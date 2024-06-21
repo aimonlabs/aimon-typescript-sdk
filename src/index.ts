@@ -10,7 +10,29 @@ if (require.main === module) {
     try {
       const user = await client.getUser("user-email");
       console.log("User details:", user);
-      // Additional method calls to demonstrate usage
+
+      // List model types
+      const listModelTypes = await client.listModelTypes();
+      console.log(listModelTypes);
+
+      // Create new model
+      const myModel = await client.createModel(
+        "your_model_name",
+        listModelTypes[0],
+        "Your description",
+        { metadata: "metadata" }
+      );
+      console.log(myModel);
+
+      // Create application
+      const myApplication = await client.createApplication(
+        "my_test_application",
+        myModel,
+        "evaluation",
+        "summarization",
+        { metadata: "metadata" }
+      );
+      console.log(myApplication);
     } catch (error) {
       console.error("An error occurred:", error);
     }

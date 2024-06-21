@@ -25,7 +25,7 @@ export interface Application {
   companyId: string;
   name: string;
   modelId: string;
-  stage: string;
+  stage: "evaluation" | "production";
   type: string;
   userId: string;
   version: number;
