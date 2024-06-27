@@ -11,7 +11,7 @@ It is generated with [Stainless](https://www.stainlessapi.com/).
 ## Installation
 
 ```sh
-npm install git+ssh://git@github.com:stainless-sdks/aimonsdk-node.git
+npm install git+ssh://git@github.com:aimonlabs/typescript-sdk.git
 ```
 
 > [!NOTE]
