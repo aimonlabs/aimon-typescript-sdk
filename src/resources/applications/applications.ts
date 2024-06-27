@@ -3,10 +3,12 @@
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
 import * as ApplicationsAPI from './applications';
-import * as MetricsAPI from './metrics';
+import * as EvaluationsAPI from './evaluations/evaluations';
+import * as ProductionAPI from './production/production';
 
 export class Applications extends APIResource {
-  metrics: MetricsAPI.Metrics = new MetricsAPI.Metrics(this._client);
+  evaluations: EvaluationsAPI.Evaluations = new EvaluationsAPI.Evaluations(this._client);
+  production: ProductionAPI.Production = new ProductionAPI.Production(this._client);
 
   /**
    * Create a new application
@@ -32,11 +34,6 @@ export interface ApplicationCreateParams {
 
 export namespace Applications {
   export import ApplicationCreateParams = ApplicationsAPI.ApplicationCreateParams;
-  export import Metrics = MetricsAPI.Metrics;
-  export import MetricListResponse = MetricsAPI.MetricListResponse;
-  export import MetricListOneResponse = MetricsAPI.MetricListOneResponse;
-  export import MetricListRunMetricsResponse = MetricsAPI.MetricListRunMetricsResponse;
-  export import MetricListParams = MetricsAPI.MetricListParams;
-  export import MetricListOneParams = MetricsAPI.MetricListOneParams;
-  export import MetricListRunMetricsParams = MetricsAPI.MetricListRunMetricsParams;
+  export import Evaluations = EvaluationsAPI.Evaluations;
+  export import Production = ProductionAPI.Production;
 }

@@ -23,19 +23,33 @@ Methods:
 
 - <code title="post /v1/application">client.applications.<a href="./src/resources/applications/applications.ts">create</a>({ ...params }) -> void</code>
 
-## Metrics
+## Evaluations
+
+### Metrics
 
 Types:
 
-- <code><a href="./src/resources/applications/metrics.ts">MetricListResponse</a></code>
-- <code><a href="./src/resources/applications/metrics.ts">MetricListOneResponse</a></code>
-- <code><a href="./src/resources/applications/metrics.ts">MetricListRunMetricsResponse</a></code>
+- <code><a href="./src/resources/applications/evaluations/metrics.ts">MetricRetrieveResponse</a></code>
+- <code><a href="./src/resources/applications/evaluations/metrics.ts">MetricListResponse</a></code>
+- <code><a href="./src/resources/applications/evaluations/metrics.ts">MetricListRunMetricsResponse</a></code>
 
 Methods:
 
-- <code title="get /v1/application/{application_name}/evaluations/metrics">client.applications.metrics.<a href="./src/resources/applications/metrics.ts">list</a>(applicationName, { ...params }) -> MetricListResponse</code>
-- <code title="get /v1/application/{application_name}/evaluations/{evaluation_id}/metrics">client.applications.metrics.<a href="./src/resources/applications/metrics.ts">listOne</a>(applicationName, evaluationId, { ...params }) -> MetricListOneResponse</code>
-- <code title="get /v1/application/{application_name}/evaluations/{evaluation_id}/run/{evaluation_run_id}/metrics">client.applications.metrics.<a href="./src/resources/applications/metrics.ts">listRunMetrics</a>(applicationName, evaluationId, evaluationRunId, { ...params }) -> MetricListRunMetricsResponse</code>
+- <code title="get /v1/application/evaluations/{evaluation_id}/metrics">client.applications.evaluations.metrics.<a href="./src/resources/applications/evaluations/metrics.ts">retrieve</a>(evaluationId, { ...params }) -> MetricRetrieveResponse</code>
+- <code title="get /v1/application/evaluations/metrics">client.applications.evaluations.metrics.<a href="./src/resources/applications/evaluations/metrics.ts">list</a>({ ...params }) -> MetricListResponse</code>
+- <code title="get /v1/application/evaluations/{evaluation_id}/run/{evaluation_run_id}/metrics">client.applications.evaluations.metrics.<a href="./src/resources/applications/evaluations/metrics.ts">listRunMetrics</a>(evaluationId, evaluationRunId, { ...params }) -> MetricListRunMetricsResponse</code>
+
+## Production
+
+### Metrics
+
+Types:
+
+- <code><a href="./src/resources/applications/production/metrics.ts">MetricRetriveResponse</a></code>
+
+Methods:
+
+- <code title="get /v1/application/production/metrics">client.applications.production.metrics.<a href="./src/resources/applications/production/metrics.ts">retrive</a>({ ...params }) -> MetricRetriveResponse</code>
 
 # Datasets
 
