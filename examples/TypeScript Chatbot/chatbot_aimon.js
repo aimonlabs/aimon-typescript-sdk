@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 // // importing all the necessary modules
 import "dotenv/config";
 import { SimpleDirectoryReader, VectorStoreIndex, ContextChatEngine } from "llamaindex";
@@ -16,6 +7,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import Client from "aimon";
 import cors from 'cors';
+import { fetchAndSaveHtml } from './fetch_document.js';
+import * as fs from 'fs';
+import * as path from 'path';
 const app = express(); // To use as a backend server
 app.use(cors()); // Enable CORS for all routes (optional, depending on your setup)
 app.use(express.json()); // Parse JSON bodies
@@ -49,115 +43,100 @@ function get_source_documents(response_string) {
     }
     return [contexts, relevance_scores];
 }
-//// Can add instructions_for_chatbot in this function. For now I skipped these.
-// Detect class from AIMON IS CALLED HERE IN THE PYTHON FILE AS A DECORATOR
-// Work on it in the last
-function am_chat(user_query, chatEngine) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield chatEngine.chat({ message: user_query });
-        let context = get_source_documents(response);
-        // response.respone is of type string
-        return [context, user_query, response.response]; //// return instructions_for_chatbot as well when using them
-        // context itself is an array comprising of contexts and relevance_scores
-    });
+async function am_chat(user_query, user_instructions, chatEngine) {
+    const response = await chatEngine.chat({ message: user_query });
+    // console.log("User instructions: " + user_instructions)
+    let context = get_source_documents(response);
+    // response.respone is of type string
+    return [context, user_query, user_instructions, response.response];
+    // context itself is an array comprising of contexts and relevance_scores
 }
-function load_data() {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Setup llm model
-        // console.log("Creating OpenAI LLM...")
-        Settings.llm = new OpenAI({
-            model: "gpt-4o-mini",
-            temperature: 0.2,
-            apiKey: openai_key
+async function load_data() {
+    // fetch the context and store it in the data folder
+    const url = 'https://paulgraham.com/worked.html';
+    const folderPath = './data';
+    const fileName = 'downloaded.html';
+    const filePath = path.join(folderPath, fileName);
+    // Check if file exists
+    if (fs.existsSync(filePath)) {
+        console.log("File exists");
+    }
+    else {
+        console.log("File does not exist");
+        await fetchAndSaveHtml(url, folderPath, fileName);
+    }
+    // Setup LLM model
+    // console.log("Creating OpenAI LLM...")
+    Settings.llm = new OpenAI({
+        model: "gpt-4o",
+        apiKey: openai_key
+    });
+    // console.log("Finished creating OpenAI LLM...")
+    Settings.chunkSize = 256;
+    Settings.chunkOverlap = 64; // keeping 1/4th of the chunkSize
+    if (fs.existsSync('./storage/vector_store.json') &&
+        fs.existsSync('./storage/index_store.json') &&
+        fs.existsSync('./storage/doc_store.json')) {
+        console.log("Embeddings exist. Loading from embeddings...");
+        const StorageContext = await storageContextFromDefaults({
+            persistDir: "./storage",
         });
-        // console.log("Finished creating OpenAI LLM...")
-        Settings.chunkSize = 256;
-        Settings.chunkOverlap = 64; // keeping 1/4th of the chunkSize
+        const loadedIndex = await VectorStoreIndex.init({
+            storageContext: StorageContext,
+        });
+        return loadedIndex;
+    }
+    else {
+        console.log("Embeddings do not exist OR are partially missing. Creating new embeddings...");
+        // In case of partially missing embeddings
+        if (fs.existsSync('./storage')) {
+            await fs.promises.rm('./storage', { recursive: true });
+        }
+        const storageContext = await storageContextFromDefaults({
+            persistDir: "./storage",
+        });
         // Create Document from data {stored locally in ./data directory}                      
         const reader = new SimpleDirectoryReader();
-        const documents = yield reader.loadData({
+        const document = await reader.loadData({
             directoryPath: "./data"
         });
-        // A try catch statement
-        // Where try: Load and return the indices, if they exist in "./storage" directory 
-        // Catch: Create a storage and store the indices in it. Return the indices
-        try {
-            const StorageContext = yield storageContextFromDefaults({
-                persistDir: "./storage",
-            });
-            const loadedIndex = yield VectorStoreIndex.init({
-                storageContext: StorageContext,
-            });
-            // console.log("Storage exists. Loaded index from storage successfully.")
-            return loadedIndex;
-        }
-        catch (_a) {
-            // console.log("Storage does not exist")
-            // console.log("Will start a new store")
-            // Split text and create embeddings. 
-            // persist the vector store automatically with the storage context
-            const storageContext = yield storageContextFromDefaults({
-                persistDir: "./storage",
-            });
-            // If embeddings exist, load them from persistDir
-            // Else create embeddings and store them in persistDir
-            const index = yield VectorStoreIndex.fromDocuments(documents, {
-                storageContext,
-            });
-            // As per the documentation, "Right now, only saving and loading from disk is supported, with future integrations planned!"
-            // console.log(index)
-            // example in documentation at: https://github.com/run-llama/LlamaIndexTS/blob/main/examples/storageContext.ts 
-            // console.log("Embeddings created and stored.")
-            return index;
-        }
-    });
+        const index = await VectorStoreIndex.fromDocuments(document, {
+            storageContext
+        });
+        return index;
+    }
 }
-function execute(query) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Initialize chat history: 
-        let chat_history = [{
-                "role": "assistant",
-                "content": "Ask me a question about Paul Graham's work experience"
-            }];
-        // load data
-        const index = load_data();
-        // Chat Engine
-        const retriever = (yield index).asRetriever({
-            similarityTopK: 4,
-        });
-        /*  Code to input instructions_for_chatbot works,
-            but for simplicity, I am not using instructions
-            for the chat bot in this version.*/
-        // Input instructions for the chatbot
-        // const instructions_for_chatbot = await rl.question("Instructions for the bot: ");
-        // console.log(instructions_for_chatbot)
-        const chatEngine = new ContextChatEngine({
-            retriever,
-            chatHistory: chat_history,
-            systemPrompt: `You are a chatbot, able to answer questions on an essay about 
-        Paul Graham's Work experience.
-        You are allowed to answer user queries from the context provided to you.
-        You can use the previous chat history as well to interact with and help the user. 
-        You strictly cannot use information obtained from the internet.
-        Please be friendly and polite.`
-            // Always end with 'over'. `
-            ,
-            /*  Python file appends instructions_for_chatbot in the systemPrompt.
-                Can do that in the next version.
-                Skipped for now, as it is just additional context. */
-        });
-        // Getting response and other parameters from the chatbot
-        const [[context, relevance_scores], user_query, generated_respone] = yield am_chat(query, chatEngine);
-        const detectParams = [
-            {
-                context: context,
-                generated_text: generated_respone,
-            }
-        ];
-        // Getting AIMon Response
-        const aimonResponse = yield aimon.inference.detect(detectParams);
-        return [generated_respone, aimonResponse];
+async function execute(query, user_instructions) {
+    // Initialize chat history: 
+    let chat_history = [{
+            "role": "assistant",
+            "content": "Ask me a question about Paul Graham's work experience"
+        }];
+    // load data
+    const index = load_data();
+    // Chat Engine
+    const retriever = (await index).asRetriever({
+        similarityTopK: 4,
     });
+    const chatEngine = new ContextChatEngine({
+        retriever,
+        chatHistory: chat_history,
+        systemPrompt: `You are a chatbot, able to answer questions on an essay about Paul Graham's Work experience.
+        You are supposed to answer user queries from the context provided to you, but can use the internet if information is not available in the context for a maximum of 20 words.
+        You should use the chat history to give a better experience to the user. 
+        Please be friendly and polite.`,
+    });
+    // Getting response and other parameters from the chatbot
+    const [[context, relevance_scores], user_query, instructions, generated_respone] = await am_chat(query, user_instructions, chatEngine);
+    const detectParams = [
+        {
+            context: context,
+            generated_text: generated_respone,
+        }
+    ];
+    // Getting AIMon Response
+    const aimonResponse = await aimon.inference.detect(detectParams);
+    return [generated_respone, aimonResponse];
 }
 const port = 3000;
 // start the server
@@ -165,13 +144,14 @@ app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 // Route to handle the form submission
-app.post('/api/query', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+app.post('/api/query', async (req, res) => {
     try {
-        const query = yield req.body.question; // query: string
-        const [generated_respone, aimonResponse] = yield execute(query);
+        const query = await req.body.question; // query: string
+        const user_instructions = await req.body.instructions;
+        const [generated_respone, aimonResponse] = await execute(query, user_instructions);
         res.status(200).json({ message_cb: generated_respone, message_aimon: aimonResponse });
     }
     catch (error) {
         res.status(500).json({ message: error });
     }
-}));
+});

@@ -59,8 +59,9 @@
     <h1>Ask questions on Paul Graham's Work Experience</h1>
     <div class="submit-area">
         <div class="input">
-            <textarea name="input" id="input" cols="40" rows="3" placeholder="Enter your query, then click submit"></textarea>
-            <button id="btn">Submit</button>
+            <textarea name="input" id="input" cols="40" rows="3" placeholder="Enter your query, then click submit">Where did Paul meet Jessica?</textarea>
+            <textarea name="instructions" id="instructions" cols="40" rows="3" placeholder="Specify instructions">Abort if user is being abusive.</textarea>
+            <button id="btn" type="submit">Submit</button>
         </div>    
     </div>  
     <div id="chat-area"></div>
@@ -70,7 +71,10 @@
     btn.addEventListener('click', getResponse)
 
     async function getResponse() {                  
-    var inputText = document.getElementById("input").value           
+    
+    var inputText = document.getElementById("input").value    
+    var inputInstructions = document.getElementById("instructions").value           
+           
     const parentDiv = document.getElementById("chat-area") 
   
     if(inputText === '') { return }
@@ -81,6 +85,8 @@
     parentDiv.appendChild(question)
 
     document.getElementById("input").value = ''
+    document.getElementById("instructions").value = ''
+
 
     let res = await fetch('http://localhost:3000/api/query', 
     {
@@ -89,7 +95,8 @@
         "Content-Type": 'application/json'                
         },
         body: JSON.stringify({
-        question: inputText          
+        question: inputText,
+        instructions: inputInstructions         
         })
     }
     )

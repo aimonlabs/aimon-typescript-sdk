@@ -7,6 +7,10 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import Client from "aimon";
 import cors from 'cors';
+import {fetchAndSaveHtml} from './fetch_document.js' 
+import * as fs from 'fs';
+import * as path from 'path';
+
 
 const app = express();      // To use as a backend server
 app.use(cors());            // Enable CORS for all routes (optional, depending on your setup)
@@ -21,7 +25,7 @@ const aimon = new Client({
     authHeader: `Bearer ${process.env.AIMON_API_KEY}`,
 });
 
-function get_source_documents(response_string){     // unable to set the type of response_string
+function get_source_documents(response_string){
     let contexts = []
     let relevance_scores = []
     // Get source documents from the generated response (of type engine response)
@@ -42,73 +46,91 @@ function get_source_documents(response_string){     // unable to set the type of
     return [contexts, relevance_scores]
 }
 
-//// Can add instructions_for_chatbot in this function. For now I skipped these.
-// Detect class from AIMON IS CALLED HERE IN THE PYTHON FILE AS A DECORATOR
-// Work on it in the last
-
-async function am_chat(user_query: string, chatEngine: ContextChatEngine){      // Passing the chatEngine as a parameter, as I'm unfamiliar with state preservation in NodeJS
+async function am_chat(user_query: string, user_instructions:string, chatEngine: ContextChatEngine){
     const response = await chatEngine.chat({message:user_query});
+    // console.log("User instructions: " + user_instructions)
     let context = get_source_documents(response);
     // response.respone is of type string
-    return [context, user_query, response.response]                             //// return instructions_for_chatbot as well when using them
+    return [context, user_query, user_instructions, response.response]                            
     // context itself is an array comprising of contexts and relevance_scores
 }
     
 async function load_data(){  
 
-    // Setup llm model
+    // fetch the context and store it in the data folder
+    const url = 'https://paulgraham.com/worked.html'
+    const folderPath = './data'; 
+    const fileName = 'downloaded.html';
+    const filePath = path.join(folderPath, fileName);
+
+    // Check if file exists
+    if (fs.existsSync(filePath)){
+        console.log("File exists");
+    }
+    else{
+        console.log("File does not exist");
+        await fetchAndSaveHtml(url, folderPath, fileName);
+    }
+
+    // Setup LLM model
     // console.log("Creating OpenAI LLM...")
     Settings.llm = new OpenAI({ 
-        model:"gpt-4o-mini",
-        temperature:0.2,
+        model:"gpt-4o",
         apiKey: openai_key });
         // console.log("Finished creating OpenAI LLM...")
     
     Settings.chunkSize = 256;
     Settings.chunkOverlap = 64; // keeping 1/4th of the chunkSize
+    
 
-    // Create Document from data {stored locally in ./data directory}                      
-    const reader = new SimpleDirectoryReader();
-    const documents = await reader.loadData({
-    directoryPath:"./data"}
-    );
 
-    // A try catch statement
-    // Where try: Load and return the indices, if they exist in "./storage" directory 
-    // Catch: Create a storage and store the indices in it. Return the indices
-    try{
+    if (
+    fs.existsSync('./storage/vector_store.json') && 
+    fs.existsSync('./storage/index_store.json') && 
+    fs.existsSync('./storage/doc_store.json'))
+    {
+        console.log("Embeddings exist. Loading from embeddings...");
+        
         const StorageContext = await storageContextFromDefaults({
             persistDir: "./storage",
-          });
+        });
+        
         const loadedIndex = await VectorStoreIndex.init({
             storageContext: StorageContext,
         });
-        // console.log("Storage exists. Loaded index from storage successfully.")
+        
         return loadedIndex;
+
     }
-    catch{
-        // console.log("Storage does not exist")
-        // console.log("Will start a new store")
-        // Split text and create embeddings. 
-        // persist the vector store automatically with the storage context
+    else{
+
+        console.log("Embeddings do not exist OR are partially missing. Creating new embeddings...");
+
+        // In case of partially missing embeddings
+        if(fs.existsSync('./storage')){
+            await fs.promises.rm('./storage', {recursive:true});
+        }
+     
         const storageContext = await storageContextFromDefaults({
             persistDir: "./storage",
         });
-        // If embeddings exist, load them from persistDir
-        // Else create embeddings and store them in persistDir
-        const index = await VectorStoreIndex.fromDocuments(documents, {
-            storageContext,
+       
+        // Create Document from data {stored locally in ./data directory}                      
+        const reader = new SimpleDirectoryReader();
+
+        const document = await reader.loadData({
+        directoryPath:"./data"}
+        );
+
+        const index = await VectorStoreIndex.fromDocuments(document, {
+            storageContext
         });
-        // As per the documentation, "Right now, only saving and loading from disk is supported, with future integrations planned!"
-        // console.log(index)
-        
-        // example in documentation at: https://github.com/run-llama/LlamaIndexTS/blob/main/examples/storageContext.ts 
-        // console.log("Embeddings created and stored.")
+ 
         return index
     }
 }
 
-async function execute(query:string){
+async function execute(query:string, user_instructions:string){
 
     // Initialize chat history: 
     let chat_history = [{
@@ -123,33 +145,20 @@ async function execute(query:string){
     const retriever = (await index).asRetriever({
         similarityTopK: 4,
       });
-    
-    /*  Code to input instructions_for_chatbot works, 
-        but for simplicity, I am not using instructions 
-        for the chat bot in this version.*/
-    // Input instructions for the chatbot
-    // const instructions_for_chatbot = await rl.question("Instructions for the bot: ");
-    // console.log(instructions_for_chatbot)
 
     const chatEngine = new ContextChatEngine({ 
         retriever, 
         chatHistory: chat_history,
         systemPrompt: 
-        `You are a chatbot, able to answer questions on an essay about 
-        Paul Graham's Work experience.
-        You are allowed to answer user queries from the context provided to you.
-        You can use the previous chat history as well to interact with and help the user. 
-        You strictly cannot use information obtained from the internet.
+        `You are a chatbot, able to answer questions on an essay about Paul Graham's Work experience.
+        You are supposed to answer user queries from the context provided to you, but can use the internet if information is not available in the context for a maximum of 20 words.
+        You should use the chat history to give a better experience to the user. 
         Please be friendly and polite.`
-        // Always end with 'over'. `
         ,
-        /*  Python file appends instructions_for_chatbot in the systemPrompt. 
-            Can do that in the next version. 
-            Skipped for now, as it is just additional context. */
     });
     
     // Getting response and other parameters from the chatbot
-    const [[context, relevance_scores], user_query, generated_respone] = await am_chat(query,chatEngine);
+    const [[context, relevance_scores], user_query, instructions, generated_respone] = await am_chat(query, user_instructions, chatEngine);
 
     const detectParams: Client.InferenceDetectParams.Body[] = [
         {
@@ -175,7 +184,8 @@ app.listen(port, () => {
 app.post('/api/query',  async (req, res) => {
     try{
         const query = await req.body.question; // query: string
-        const [generated_respone, aimonResponse] = await execute(query);
+        const user_instructions = await req.body.instructions;
+        const [generated_respone, aimonResponse] = await execute(query, user_instructions);
         res.status(200).json({message_cb: generated_respone, message_aimon: aimonResponse});
         }
     catch(error){
