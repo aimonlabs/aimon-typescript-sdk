@@ -3,10 +3,10 @@
 export { Evaluations } from './evaluations';
 export {
   MetricRetrieveResponse,
-  MetricListResponse,
-  MetricListRunMetricsResponse,
+  MetricGetEvaluationMetricsResponse,
+  MetricGetEvaluationRunMetricsResponse,
   MetricRetrieveParams,
-  MetricListParams,
-  MetricListRunMetricsParams,
+  MetricGetEvaluationMetricsParams,
+  MetricGetEvaluationRunMetricsParams,
   Metrics,
 } from './metrics';

@@ -11,12 +11,11 @@ export class Evaluations extends APIResource {
   /**
    * Create a new evaluation
    */
-  create(body: EvaluationCreateParams, options?: Core.RequestOptions): Core.APIPromise<void> {
-    return this._client.post('/v1/evaluation', {
-      body,
-      ...options,
-      headers: { Accept: '*/*', ...options?.headers },
-    });
+  create(
+    body: EvaluationCreateParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<EvaluationCreateResponse> {
+    return this._client.post('/v1/evaluation', { body, ...options });
   }
 
   /**
@@ -28,17 +27,24 @@ export class Evaluations extends APIResource {
   ): Core.APIPromise<EvaluationRetrieveResponse> {
     return this._client.get('/v1/evaluations', { query, ...options });
   }
+}
 
-  /**
-   * Save and compute metrics
-   */
-  computeMetrics(body: EvaluationComputeMetricsParams, options?: Core.RequestOptions): Core.APIPromise<void> {
-    return this._client.post('/v1/save-compute-metrics', {
-      body,
-      ...options,
-      headers: { Accept: '*/*', ...options?.headers },
-    });
-  }
+export interface EvaluationCreateResponse {
+  application_id: string;
+
+  dataset_collection_id: string;
+
+  model_id: string;
+
+  name: string;
+
+  id?: string;
+
+  end_time?: string;
+
+  metadata?: unknown;
+
+  start_time?: string;
 }
 
 export type EvaluationRetrieveResponse = Array<EvaluationRetrieveResponse.EvaluationRetrieveResponseItem>;
@@ -62,32 +68,25 @@ export interface EvaluationCreateParams {
 
   name: string;
 
-  created_at?: string;
+  id?: string;
+
+  end_time?: string;
+
+  metadata?: unknown;
+
+  start_time?: string;
 }
 
 export interface EvaluationRetrieveParams {
   name: string;
 }
 
-export type EvaluationComputeMetricsParams = Array<EvaluationComputeMetricsParams.Body>;
-
-export namespace EvaluationComputeMetricsParams {
-  export interface Body {
-    application_id: string;
-
-    output: string;
-
-    additionalProperty1?: string;
-
-    additionalProperty2?: string;
-  }
-}
-
 export namespace Evaluations {
+  export import EvaluationCreateResponse = EvaluationsAPI.EvaluationCreateResponse;
   export import EvaluationRetrieveResponse = EvaluationsAPI.EvaluationRetrieveResponse;
   export import EvaluationCreateParams = EvaluationsAPI.EvaluationCreateParams;
   export import EvaluationRetrieveParams = EvaluationsAPI.EvaluationRetrieveParams;
-  export import EvaluationComputeMetricsParams = EvaluationsAPI.EvaluationComputeMetricsParams;
   export import Run = RunAPI.Run;
+  export import RunCreateResponse = RunAPI.RunCreateResponse;
   export import RunCreateParams = RunAPI.RunCreateParams;
 }

@@ -6,32 +6,35 @@ import * as MetricsAPI from './metrics';
 
 export class Metrics extends APIResource {
   /**
-   * Fetch metrics for a specific evaluation of an application
+   * Fetch metrics for all evaluations of an application
    */
   retrieve(
-    evaluationId: string,
     query: MetricRetrieveParams,
     options?: Core.RequestOptions,
   ): Core.APIPromise<MetricRetrieveResponse> {
-    return this._client.get(`/v1/application/evaluations/${evaluationId}/metrics`, { query, ...options });
+    return this._client.get('/v1/application/evaluations/metrics', { query, ...options });
   }
 
   /**
-   * Fetch metrics for all evaluations of an application
+   * Fetch metrics for a specific evaluation of an application
    */
-  list(query: MetricListParams, options?: Core.RequestOptions): Core.APIPromise<MetricListResponse> {
-    return this._client.get('/v1/application/evaluations/metrics', { query, ...options });
+  getEvaluationMetrics(
+    evaluationId: string,
+    query: MetricGetEvaluationMetricsParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<MetricGetEvaluationMetricsResponse> {
+    return this._client.get(`/v1/application/evaluations/${evaluationId}/metrics`, { query, ...options });
   }
 
   /**
    * Fetch metrics for a specific run of a specific evaluation
    */
-  listRunMetrics(
+  getEvaluationRunMetrics(
     evaluationId: string,
     evaluationRunId: string,
-    query: MetricListRunMetricsParams,
+    query: MetricGetEvaluationRunMetricsParams,
     options?: Core.RequestOptions,
-  ): Core.APIPromise<MetricListRunMetricsResponse> {
+  ): Core.APIPromise<MetricGetEvaluationRunMetricsResponse> {
     return this._client.get(`/v1/application/evaluations/${evaluationId}/run/${evaluationRunId}/metrics`, {
       query,
       ...options,
@@ -40,18 +43,47 @@ export class Metrics extends APIResource {
 }
 
 export interface MetricRetrieveResponse {
-  evaluations?: Array<unknown>;
+  evaluations?: Array<MetricRetrieveResponse.Evaluation>;
 }
 
-export interface MetricListResponse {
-  evaluations?: Array<unknown>;
+export namespace MetricRetrieveResponse {
+  export interface Evaluation {
+    metricName?: string;
+
+    timestamp?: string;
+
+    value?: number;
+  }
 }
 
-export interface MetricListRunMetricsResponse {
-  evaluations?: Array<MetricListRunMetricsResponse.Evaluation>;
+export interface MetricGetEvaluationMetricsResponse {
+  evaluations?: Array<MetricGetEvaluationMetricsResponse.Evaluation>;
 }
 
-export namespace MetricListRunMetricsResponse {
+export namespace MetricGetEvaluationMetricsResponse {
+  export interface Evaluation {
+    /**
+     * The name of the metric
+     */
+    metricName?: string;
+
+    /**
+     * The timestamp when the metric was recorded
+     */
+    timestamp?: string;
+
+    /**
+     * The value of the metric
+     */
+    value?: number;
+  }
+}
+
+export interface MetricGetEvaluationRunMetricsResponse {
+  evaluations?: Array<MetricGetEvaluationRunMetricsResponse.Evaluation>;
+}
+
+export namespace MetricGetEvaluationRunMetricsResponse {
   export interface Evaluation {
     /**
      * The name of the metric
@@ -71,6 +103,16 @@ export namespace MetricListRunMetricsResponse {
 }
 
 export interface MetricRetrieveParams {
+  application_name: string;
+
+  end_timestamp?: string;
+
+  start_timestamp?: string;
+
+  version?: string;
+}
+
+export interface MetricGetEvaluationMetricsParams {
   /**
    * The name of the application for which metrics are being fetched
    */
@@ -92,17 +134,7 @@ export interface MetricRetrieveParams {
   version?: string;
 }
 
-export interface MetricListParams {
-  application_name: string;
-
-  end_timestamp?: string;
-
-  start_timestamp?: string;
-
-  version?: string;
-}
-
-export interface MetricListRunMetricsParams {
+export interface MetricGetEvaluationRunMetricsParams {
   /**
    * The name of the application for which metrics are being fetched
    */
@@ -126,9 +158,9 @@ export interface MetricListRunMetricsParams {
 
 export namespace Metrics {
   export import MetricRetrieveResponse = MetricsAPI.MetricRetrieveResponse;
-  export import MetricListResponse = MetricsAPI.MetricListResponse;
-  export import MetricListRunMetricsResponse = MetricsAPI.MetricListRunMetricsResponse;
+  export import MetricGetEvaluationMetricsResponse = MetricsAPI.MetricGetEvaluationMetricsResponse;
+  export import MetricGetEvaluationRunMetricsResponse = MetricsAPI.MetricGetEvaluationRunMetricsResponse;
   export import MetricRetrieveParams = MetricsAPI.MetricRetrieveParams;
-  export import MetricListParams = MetricsAPI.MetricListParams;
-  export import MetricListRunMetricsParams = MetricsAPI.MetricListRunMetricsParams;
+  export import MetricGetEvaluationMetricsParams = MetricsAPI.MetricGetEvaluationMetricsParams;
+  export import MetricGetEvaluationRunMetricsParams = MetricsAPI.MetricGetEvaluationRunMetricsParams;
 }

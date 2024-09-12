@@ -9,6 +9,6 @@ export class Production extends APIResource {
 
 export namespace Production {
   export import Metrics = MetricsAPI.Metrics;
-  export import MetricRetriveResponse = MetricsAPI.MetricRetriveResponse;
-  export import MetricRetriveParams = MetricsAPI.MetricRetriveParams;
+  export import MetricRetrieveResponse = MetricsAPI.MetricRetrieveResponse;
+  export import MetricRetrieveParams = MetricsAPI.MetricRetrieveParams;
 }
