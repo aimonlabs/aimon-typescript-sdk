@@ -6,36 +6,339 @@ This library provides convenient access to the Aimon REST API from server-side T
 
 The REST API documentation can be found [on docs.aimon.com](https://docs.aimon.com). The full API of this library can be found in [api.md](api.md).
 
-It is generated with [Stainless](https://www.stainlessapi.com/).
-
 ## Installation
 
 ```sh
-npm install git+ssh://git@github.com:aimonlabs/typescript-sdk.git
+npm install aimon
 ```
-
-> [!NOTE]
-> Once this package is [published to npm](https://app.stainlessapi.com/docs/guides/publish), this will become: `npm install aimon`
 
 ## Usage
 
-The full API of this library can be found in [api.md](api.md).
-
 <!-- prettier-ignore -->
 ```js
-import Aimon from 'aimon';
+import Client from "aimon";
+import { OpenAI } from "@langchain/openai";
+import { loadSummarizationChain } from "langchain/chains";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { fileFromPath } from "formdata-node/file-from-path";
 
-const aimon = new Aimon({
-  apiKey: 'My API Key',
+// Create the AIMon client. You would need an API Key (that can be retrieved from the UI in your user profile).
+const aimon = new Client({
+  authHeader: 'Bearer: <AIMON_API_KEY>',
 });
 
-async function main() {
-  const user = await aimon.users.retrieve({ email: 'REPLACE_ME' });
+// Initialize OpenAI configuration
+const openaiApiKey = "OPENAI_API_KEY";
 
-  console.log(user.id);
+const runApplication: any = async (
+  applicationName: string,
+  modelName: string,
+  sourceText: any,
+  prompt: string | null = null,
+  userQuery: string | null = null,
+) => {
+  // Split the source text
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+  const docs = await textSplitter.createDocuments([sourceText]);
+  const contextDocs = docs.map((doc) => doc.pageContent);
+
+  // Summarize the texts
+  const llm = new OpenAI({ temperature: 0, openAIApiKey: openaiApiKey });
+  const chain = loadSummarizationChain(llm, { type: "map_reduce" });
+  const output = await chain.invoke({
+    input_documents: docs,
+  });
+
+  const payload = {
+    context_docs: contextDocs,
+    output: String(output.text),
+    prompt: prompt ?? "",
+    user_query: userQuery ?? "",
+    instructions: "These are the instructions",
+    actual_request_timestamp: "2024-08-02 14:30:00", // Used as the request time if provided; defaults to current date if not set.
+  };
+
+  const config = {
+    hallucination: { detector_name: "default" },
+    conciseness: { detector_name: "default" },
+    completeness: { detector_name: "default" },
+    instruction_adherence: { detector_name: "default" },
+  };
+
+  // Analyze quality of the generated output using AIMon
+  const response: Client.AnalyzeCreateResponse = await aimon.analyze.production(
+    applicationName,
+    modelName,
+    payload,
+    config
+  );
+};
+
+
+// A synchronous API to detect quality metrics in the response of a language model.
+const detectMetrics: any = async (sourceText: any) => {
+  // Split the source text
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+  const docs = await textSplitter.createDocuments([sourceText]);
+  const contextDocs = docs.map((doc) => doc.pageContent);
+
+  // Summarize the texts
+  const llm = new OpenAI({ temperature: 0, openAIApiKey: openaiApiKey });
+  const chain = loadSummarizationChain(llm, { type: "map_reduce" });
+  const output = await chain.invoke({
+    input_documents: docs,
+  });
+
+  // Detect quality of the generated output using AIMon
+  const detectParams: Client.InferenceDetectParams.Body[] = [
+    {
+      context: contextDocs,
+      generated_text: output.text,
+    },
+  ];
+
+  // Call the API
+  const aimonResponse: Client.InferenceDetectResponse =
+    await aimon.inference.detect(detectParams);
+};
+
+async function main() {
+  try {
+    
+    /** It is possible to check metrics in two different ways, using the async call name runApplication below or the synchronous call name detectMetrics. **/
+    runApplication("application_name", "model_name", sourceText, prompt, userQuery);
+
+    /** Synchronous call **/
+    // detectMetrics();
+    
+
+  } catch (error) {
+    // Error
+    console.log(error);
+  }
 }
 
 main();
+```
+
+## Creating Evaluations
+
+<!-- prettier-ignore -->
+```js
+import Client from "aimon";
+import { OpenAI } from "@langchain/openai";
+import { loadSummarizationChain } from "langchain/chains";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import { fileFromPath } from "formdata-node/file-from-path";
+
+// Create the AIMon client. You would need an API Key (that can be retrieved from the UI in your user profile).
+const aimon = new Client({
+  authHeader: 'Bearer: <AIMON_API_KEY>',
+});
+
+// Initialize OpenAI configuration
+const openaiApiKey = "OPENAI_API_KEY";
+
+// Analyzes the dataset record and model output offline.
+const runApplication: any = async (
+  application: any,
+  sourceText: any,
+  prompt: string | null = null,
+  userQuery: string | null = null,
+  evaluationRun: any = null
+) => {
+  // Split the source text
+  const textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
+  const docs = await textSplitter.createDocuments([sourceText]);
+  const contextDocs = docs.map((doc) => doc.pageContent);
+
+  // Summarize the texts
+  const llm = new OpenAI({ temperature: 0, openAIApiKey: openaiApiKey });
+  const chain = loadSummarizationChain(llm, { type: "map_reduce" });
+  const output = await chain.invoke({
+    input_documents: docs,
+  });
+
+  // Analyze quality of the generated output using AIMon
+  const aimonResponse: Client.AnalyzeCreateResponse =
+    await aimon.analyze.create([
+      {
+        application_id: application.id,
+        version: application.version,
+        prompt: prompt !== null ? prompt : "",
+        user_query: userQuery !== null ? userQuery : "",
+        context_docs: contextDocs,
+        output: output.text,
+        evaluation_id: evaluationRun.evaluation_id,
+        evaluation_run_id: evaluationRun.id,
+      },
+    ]);
+};
+
+// Creates a new dataset from the local path csv file
+const createDataset = async (
+  path: string,
+  datasetName: string,
+  description: string
+): Promise<Client.Dataset> => {
+  const file = await fileFromPath(path);
+  const json_data = JSON.stringify({
+    name: datasetName,
+    description: description,
+  });
+
+  const params = {
+    file: file,
+    json_data: json_data,
+  };
+
+  const dataset: Client.Dataset = await aimon.datasets.create(params);
+  return dataset;
+};
+
+async function main() {
+  try {
+    // Pick from existing model model types in the company. These are created by you or other member of your organization.
+    // The AIMon client has a convenience function to easily retrieve this.
+    const modelTypes = await aimon.models.list();
+
+    // Create or get a model for a given model type.
+    // This API will automatically create a new model if it does not exist.
+    const myModel: Client.ModelCreateResponse = await aimon.models.create({
+      name: "my_gpt4_model_fine_tuned",
+      type: "GPT-4",
+      description:
+        "This model is a GPT4 based model and is fine tuned on the awesome_finetuning dataset",
+    });
+
+    // Create or get an existing application
+    // This API will automatically create a new application if it does not exist.
+    const myApplication: Client.ApplicationCreateResponse =
+      await aimon.applications.create({
+        name: "my_llm_summarization_app",
+        model_name: myModel.name,
+        type: "summarization",
+        stage: "evaluation",
+      });
+
+    const dataset1 = await createDataset(
+      "/path/to/file/filename_1.csv",
+      "filename1.csv",
+      "description"
+    );
+
+    const dataset2 = await createDataset(
+      "/path/to/file/filename_2.csv",
+      "filename2.csv",
+      "description"
+    );
+
+    let datasetCollection: Client.Datasets.CollectionCreateResponse | undefined;
+
+    // Ensures that dataset1.sha and dataset2.sha are defined
+    if (dataset1.sha && dataset2.sha) {
+      // Creates dataset collection
+      datasetCollection = await aimon.datasets.collection.create({
+        name: "my_first_dataset_collection",
+        dataset_ids: [dataset1.sha, dataset2.sha],
+        description: "This is a collection of two datasets.",
+      });
+    } else {
+      throw new Error("Dataset sha is undefined");
+    }
+
+    // Creates evaluation
+    let evaluation: Client.EvaluationCreateResponse;
+
+    if (
+      datasetCollection &&
+      datasetCollection.id &&
+      myModel.id &&
+      myApplication.id
+    ) {
+      evaluation = await aimon.evaluations.create({
+        name: "my_evaluation",
+        dataset_collection_id: datasetCollection.id,
+        model_id: myModel.id,
+        application_id: myApplication.id,
+      });
+    } else {
+      throw new Error("Dataset collection is not defined");
+    }
+
+    // Creates evaluation run
+    let newEvaluationRun: Client.Evaluations.RunCreateParams;
+    if (evaluation && evaluation.id) {
+      newEvaluationRun = await aimon.evaluations.run.create({
+        evaluation_id: evaluation.id,
+      });
+    } else {
+      throw new Error("Error creating evaluation run");
+    }
+
+    const records: any = await aimon.datasets.records.list({
+      sha: dataset1.sha,
+    });
+
+    for (const record of records) {
+      await runApplication(
+        myApplication,
+        record.context_docs,
+        record.prompt,
+        record.user_query,
+        newEvaluationRun
+      );
+    }
+
+    // List metrics for the entire application
+    const applicationMetrics = await aimon.applications.evaluations.metrics.retrieve({
+      application_name: myApplication.name,
+    });
+
+    // Get metrics for an specific evaluation
+    if (evaluation.id) {
+      const query = { application_name: myApplication.name };
+      const evalMetrics =
+        await aimon.applications.evaluations.metrics.getEvaluationMetrics(
+          evaluation.id,
+          query
+        );
+    }
+    // Get metrics for an specific evaluation run
+    if (newEvaluationRun.id) {
+      const query = { application_name: myApplication.name };
+      const evalRunMetrics =
+        await aimon.applications.evaluations.metrics.getEvaluationRunMetrics(
+          evaluation.id,
+          newEvaluationRun.id,
+          query
+        );
+    }
+
+  } catch (error) {
+    // Error
+    console.log(error);
+  }
+}
+
+main();
+```
+
+### Delete an application
+
+```js
+import Client from "aimon";
+
+// Create the AIMon client. You would need an API Key (that can be retrieved from the UI in your user profile).
+const aimon = new Client({
+  authHeader: "Bearer: <AIMON_API_KEY>",
+});
+
+const response = await aimon.applications.delete({
+  name: "application_name",
+  stage: "application_stage",
+  version: "version",
+});
 ```
 
 ### Request & Response types
@@ -170,9 +473,9 @@ To make requests to undocumented endpoints, you can use `client.get`, `client.po
 Options on the client, such as retries, will be respected when making these requests.
 
 ```ts
-await client.post('/some/path', {
-  body: { some_prop: 'foo' },
-  query: { some_query_arg: 'bar' },
+await client.post("/some/path", {
+  body: { some_prop: "foo" },
+  query: { some_query_arg: "bar" },
 });
 ```
 
@@ -184,10 +487,10 @@ send will be sent as-is.
 
 ```ts
 client.foo.create({
-  foo: 'my_param',
+  foo: "my_param",
   bar: 12,
   // @ts-expect-error baz is not yet public
-  baz: 'undocumented option',
+  baz: "undocumented option",
 });
 ```
 
@@ -214,12 +517,9 @@ add the following import before your first import `from "Aimon"`:
 ```ts
 // Tell TypeScript and the package to use the global web fetch instead of node-fetch.
 // Note, despite the name, this does not add any polyfills, but expects them to be provided if needed.
-import 'aimon/shims/web';
-import Aimon from 'aimon';
+import "aimon/shims/web";
+import Aimon from "aimon";
 ```
-
-To do the inverse, add `import "aimon/shims/node"` (which does import polyfills).
-This can also be useful if you are getting the wrong TypeScript types for `Response` ([more details](https://github.com/stainless-sdks/aimonsdk-node/tree/main/src/_shims#readme)).
 
 ### Logging and middleware
 
@@ -227,14 +527,14 @@ You may also provide a custom `fetch` function when instantiating the client,
 which can be used to inspect or alter the `Request` or `Response` before/after each request:
 
 ```ts
-import { fetch } from 'undici'; // as one example
-import Aimon from 'aimon';
+import { fetch } from "undici"; // as one example
+import Aimon from "aimon";
 
 const client = new Aimon({
   fetch: async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    console.log('About to make a request', url, init);
+    console.log("About to make a request", url, init);
     const response = await fetch(url, init);
-    console.log('Got response', response);
+    console.log("Got response", response);
     return response;
   },
 });
@@ -277,8 +577,6 @@ This package generally follows [SemVer](https://semver.org/spec/v2.0.0.html) con
 3. Changes that we do not expect to impact the vast majority of users in practice.
 
 We take backwards-compatibility seriously and work hard to ensure you can rely on a smooth upgrade experience.
-
-We are keen for your feedback; please open an [issue](https://www.github.com/stainless-sdks/aimonsdk-node/issues) with questions, bugs, or suggestions.
 
 ## Requirements
 
