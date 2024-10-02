@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        h1 {
+            width: 800px;;
+            margin: 0 auto;
+            text-align: center;
+        }
+        #chat-area {
+            margin: 0 auto;
+            width: 80%;
+            height: 500px;
+            overflow:scroll;
+            border: 1px solid gray;
+            border-radius: 4px;
+        }
+
+        .input {            
+            width: 100%;
+        }
+
+        .submit-area{
+            justify-content: center;
+            display: flex;
+            margin: 20px auto;
+            width: 80%;            
+        }       
+
+        textarea {
+            width: 100%;
+        }
+
+        .box {
+            width: 96%;
+            margin: 0 auto;
+            padding: 10px 10px;
+            background-color: #C4DBFE;
+            margin: 10px auto;            
+        }
+
+        .answer {
+            background-color: aquamarine;
+        }
+
+        button {
+            background-color: #004089;
+            color: white;
+            padding: 10px 10px;
+            border-radius: 5px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ask questions on Paul Graham's Work Experience</h1>
+    <div class="submit-area">
+        <div class="input">
+            <textarea name="input" id="input" cols="40" rows="3" placeholder="Enter your query, then click submit">Where did Paul meet Jessica?</textarea>
+            <textarea name="instructions" id="instructions" cols="40" rows="3" placeholder="Specify instructions">Abort if user is being abusive.</textarea>
+            <button id="btn" type="submit">Submit</button>
+        </div>    
+    </div>  
+    <div id="chat-area"></div>
+  
+ <script>
+    const btn = document.getElementById("btn")
+    btn.addEventListener('click', getResponse)
+
+    async function getResponse() {                  
+    
+    var inputText = document.getElementById("input").value    
+    var inputInstructions = document.getElementById("instructions").value           
+           
+    const parentDiv = document.getElementById("chat-area") 
+  
+    if(inputText === '') { return }
+
+    const question = document.createElement('div')
+    question.innerHTML = inputText
+    question.classList.add("box")
+    parentDiv.appendChild(question)
+
+    document.getElementById("input").value = ''
+    document.getElementById("instructions").value = ''
+
+
+    let res = await fetch('http://localhost:3000/api/query', 
+    {
+        method: 'POST',
+        headers: {
+        "Content-Type": 'application/json'                
+        },
+        body: JSON.stringify({
+        question: inputText,
+        instructions: inputInstructions         
+        })
+    }
+    )
+        
+    const data = await res.json()
+
+    if(data) {
+    const answer = document.createElement('div')
+    answer.innerHTML = data.message_cb
+    answer.classList.add("box", "answer")
+    parentDiv.appendChild(answer)
+
+    const answer2 = document.createElement('div')
+    answer2.innerHTML = JSON.stringify(data.message_aimon[0])
+    answer2.classList.add("box", "answer")
+    parentDiv.appendChild(answer2)
+    }
+
+    }
+ </script>
+</body>
+</html>

@@ -1,11 +1,11 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import type { Aimon } from './index';
+import type { Client } from './index';
 
 export class APIResource {
-  protected _client: Aimon;
+  protected _client: Client;
 
-  constructor(client: Aimon) {
+  constructor(client: Client) {
     this._client = client;
   }
 }

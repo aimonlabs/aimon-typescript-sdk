@@ -8,12 +8,8 @@ export class Users extends APIResource {
   /**
    * Create a new user
    */
-  create(body: UserCreateParams, options?: Core.RequestOptions): Core.APIPromise<void> {
-    return this._client.post('/v1/user', {
-      body,
-      ...options,
-      headers: { Accept: '*/*', ...options?.headers },
-    });
+  create(body: UserCreateParams, options?: Core.RequestOptions): Core.APIPromise<User> {
+    return this._client.post('/v1/user', { body, ...options });
   }
 
   /**
@@ -26,11 +22,8 @@ export class Users extends APIResource {
   /**
    * Validate API key
    */
-  validate(apiKey: string, options?: Core.RequestOptions): Core.APIPromise<void> {
-    return this._client.get(`/v1/api-key/${apiKey}/validate`, {
-      ...options,
-      headers: { Accept: '*/*', ...options?.headers },
-    });
+  validate(apiKey: string, options?: Core.RequestOptions): Core.APIPromise<UserValidateResponse> {
+    return this._client.get(`/v1/api-key/${apiKey}/validate`, options);
   }
 }
 
@@ -43,11 +36,31 @@ export interface User {
 
   username: string;
 
+  auth0_id?: string;
+
+  bio?: string;
+
+  company_id?: string;
+
+  date_joined?: string;
+
   firstName?: string;
+
+  is_active?: boolean;
+
+  is_staff?: boolean;
+
+  is_superuser?: boolean;
+
+  last_login?: string;
 
   lastName?: string;
 
   userStatus?: number;
+}
+
+export interface UserValidateResponse {
+  company_id?: string;
 }
 
 export interface UserCreateParams {
@@ -59,7 +72,23 @@ export interface UserCreateParams {
 
   username: string;
 
+  auth0_id?: string;
+
+  bio?: string;
+
+  company_id?: string;
+
+  date_joined?: string;
+
   firstName?: string;
+
+  is_active?: boolean;
+
+  is_staff?: boolean;
+
+  is_superuser?: boolean;
+
+  last_login?: string;
 
   lastName?: string;
 
@@ -72,6 +101,7 @@ export interface UserRetrieveParams {
 
 export namespace Users {
   export import User = UsersAPI.User;
+  export import UserValidateResponse = UsersAPI.UserValidateResponse;
   export import UserCreateParams = UsersAPI.UserCreateParams;
   export import UserRetrieveParams = UsersAPI.UserRetrieveParams;
 }

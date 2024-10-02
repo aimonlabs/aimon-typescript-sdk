@@ -10,9 +10,9 @@ export class Evaluations extends APIResource {
 export namespace Evaluations {
   export import Metrics = MetricsAPI.Metrics;
   export import MetricRetrieveResponse = MetricsAPI.MetricRetrieveResponse;
-  export import MetricListResponse = MetricsAPI.MetricListResponse;
-  export import MetricListRunMetricsResponse = MetricsAPI.MetricListRunMetricsResponse;
+  export import MetricGetEvaluationMetricsResponse = MetricsAPI.MetricGetEvaluationMetricsResponse;
+  export import MetricGetEvaluationRunMetricsResponse = MetricsAPI.MetricGetEvaluationRunMetricsResponse;
   export import MetricRetrieveParams = MetricsAPI.MetricRetrieveParams;
-  export import MetricListParams = MetricsAPI.MetricListParams;
-  export import MetricListRunMetricsParams = MetricsAPI.MetricListRunMetricsParams;
+  export import MetricGetEvaluationMetricsParams = MetricsAPI.MetricGetEvaluationMetricsParams;
+  export import MetricGetEvaluationRunMetricsParams = MetricsAPI.MetricGetEvaluationRunMetricsParams;
 }

@@ -8,16 +8,38 @@ export class Metrics extends APIResource {
   /**
    * Fetch production metrics of an application
    */
-  retrive(query: MetricRetriveParams, options?: Core.RequestOptions): Core.APIPromise<MetricRetriveResponse> {
+  retrieve(
+    query: MetricRetrieveParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<MetricRetrieveResponse> {
     return this._client.get('/v1/application/production/metrics', { query, ...options });
   }
 }
 
-export interface MetricRetriveResponse {
-  evaluations?: Array<unknown>;
+export interface MetricRetrieveResponse {
+  evaluations?: Array<MetricRetrieveResponse.Evaluation>;
 }
 
-export interface MetricRetriveParams {
+export namespace MetricRetrieveResponse {
+  export interface Evaluation {
+    /**
+     * The name of the metric
+     */
+    metricName?: string;
+
+    /**
+     * The timestamp when the metric was recorded
+     */
+    timestamp?: string;
+
+    /**
+     * The value of the metric
+     */
+    value?: number;
+  }
+}
+
+export interface MetricRetrieveParams {
   application_name: string;
 
   end_timestamp?: string;
@@ -28,6 +50,6 @@ export interface MetricRetriveParams {
 }
 
 export namespace Metrics {
-  export import MetricRetriveResponse = MetricsAPI.MetricRetriveResponse;
-  export import MetricRetriveParams = MetricsAPI.MetricRetriveParams;
+  export import MetricRetrieveResponse = MetricsAPI.MetricRetrieveResponse;
+  export import MetricRetrieveParams = MetricsAPI.MetricRetrieveParams;
 }

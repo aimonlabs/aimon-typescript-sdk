@@ -13,12 +13,8 @@ export class Datasets extends APIResource {
   /**
    * Create a new dataset
    */
-  create(body: DatasetCreateParams, options?: Core.RequestOptions): Core.APIPromise<void> {
-    return this._client.post('/v1/dataset', {
-      body,
-      ...options,
-      headers: { Accept: '*/*', ...options?.headers },
-    });
+  create(body: DatasetCreateParams, options?: Core.RequestOptions): Core.APIPromise<Dataset> {
+    return this._client.post('/v1/dataset', Core.multipartFormRequestOptions({ body, ...options }));
   }
 
   /**
@@ -34,15 +30,31 @@ export interface Dataset {
 
   name: string;
 
-  user_id: string;
+  id?: string;
+
+  company_id?: string;
+
+  creation_time?: string;
+
+  last_updated_time?: string;
+
+  s3_location?: string;
+
+  sha?: string;
+
+  user_id?: string;
 }
 
 export interface DatasetCreateParams {
-  description: string;
+  /**
+   * The CSV file containing the dataset
+   */
+  file: Core.Uploadable;
 
-  name: string;
-
-  user_id: string;
+  /**
+   * JSON string containing dataset metadata
+   */
+  json_data: string;
 }
 
 export interface DatasetListParams {
@@ -57,5 +69,8 @@ export namespace Datasets {
   export import RecordListResponse = RecordsAPI.RecordListResponse;
   export import RecordListParams = RecordsAPI.RecordListParams;
   export import Collection = CollectionAPI.Collection;
+  export import CollectionCreateResponse = CollectionAPI.CollectionCreateResponse;
+  export import CollectionRetrieveResponse = CollectionAPI.CollectionRetrieveResponse;
   export import CollectionCreateParams = CollectionAPI.CollectionCreateParams;
+  export import CollectionRetrieveParams = CollectionAPI.CollectionRetrieveParams;
 }

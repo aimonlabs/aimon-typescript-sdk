@@ -7,12 +7,12 @@ import * as Core from './core';
 import * as API from './resources/index';
 
 export interface ClientOptions {
-  apiKey: string;
+  authHeader: string;
 
   /**
    * Override the default base URL for the API, e.g., "https://api.example.com/v2/"
    *
-   * Defaults to process.env['AIMON_BASE_URL'].
+   * Defaults to process.env['CLIENT_BASE_URL'].
    */
   baseURL?: string | null | undefined;
 
@@ -67,18 +67,18 @@ export interface ClientOptions {
 }
 
 /**
- * API Client for interfacing with the Aimon API.
+ * API Client for interfacing with the Client API.
  */
-export class Aimon extends Core.APIClient {
-  apiKey: string;
+export class Client extends Core.APIClient {
+  authHeader: string;
 
   private _options: ClientOptions;
 
   /**
-   * API Client for interfacing with the Aimon API.
+   * API Client for interfacing with the Client API.
    *
-   * @param {string} opts.apiKey
-   * @param {string} [opts.baseURL=process.env['AIMON_BASE_URL'] ?? https://pbe-api.aimon.ai] - Override the default base URL for the API.
+   * @param {string} opts.authHeader
+   * @param {string} [opts.baseURL=process.env['CLIENT_BASE_URL'] ?? https://pbe-api.aimon.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {number} [opts.httpAgent] - An HTTP agent used to manage HTTP(s) connections.
    * @param {Core.Fetch} [opts.fetch] - Specify a custom `fetch` function implementation.
@@ -86,15 +86,15 @@ export class Aimon extends Core.APIClient {
    * @param {Core.Headers} opts.defaultHeaders - Default headers to include with every request to the API.
    * @param {Core.DefaultQuery} opts.defaultQuery - Default query parameters to include with every request to the API.
    */
-  constructor({ baseURL = Core.readEnv('AIMON_BASE_URL'), apiKey, ...opts }: ClientOptions) {
-    if (apiKey === undefined) {
-      throw new Errors.AimonError(
-        "Missing required client option apiKey; you need to instantiate the Aimon client with an apiKey option, like new Aimon({ apiKey: 'My API Key' }).",
+  constructor({ baseURL = Core.readEnv('CLIENT_BASE_URL'), authHeader, ...opts }: ClientOptions) {
+    if (authHeader === undefined) {
+      throw new Errors.ClientError(
+        "Missing required client option authHeader; you need to instantiate the Client client with an authHeader option, like new Client({ authHeader: 'My Auth Header' }).",
       );
     }
 
     const options: ClientOptions = {
-      apiKey,
+      authHeader,
       ...opts,
       baseURL: baseURL || `https://pbe-api.aimon.ai`,
     };
@@ -109,7 +109,7 @@ export class Aimon extends Core.APIClient {
 
     this._options = options;
 
-    this.apiKey = apiKey;
+    this.authHeader = authHeader;
   }
 
   users: API.Users = new API.Users(this);
@@ -117,6 +117,8 @@ export class Aimon extends Core.APIClient {
   applications: API.Applications = new API.Applications(this);
   datasets: API.Datasets = new API.Datasets(this);
   evaluations: API.Evaluations = new API.Evaluations(this);
+  analyze: API.Analyze = new API.Analyze(this);
+  inference: API.Inference = new API.Inference(this);
 
   protected override defaultQuery(): Core.DefaultQuery | undefined {
     return this._options.defaultQuery;
@@ -130,12 +132,13 @@ export class Aimon extends Core.APIClient {
   }
 
   protected override authHeaders(opts: Core.FinalRequestOptions): Core.Headers {
-    return { Authorization: this.apiKey };
+    return { Authorization: this.authHeader };
   }
 
-  static Aimon = this;
+  static Client = this;
+  static DEFAULT_TIMEOUT = 60000; // 1 minute
 
-  static AimonError = Errors.AimonError;
+  static ClientError = Errors.ClientError;
   static APIError = Errors.APIError;
   static APIConnectionError = Errors.APIConnectionError;
   static APIConnectionTimeoutError = Errors.APIConnectionTimeoutError;
@@ -154,7 +157,7 @@ export class Aimon extends Core.APIClient {
 }
 
 export const {
-  AimonError,
+  ClientError,
   APIError,
   APIConnectionError,
   APIConnectionTimeoutError,
@@ -172,19 +175,29 @@ export const {
 export import toFile = Uploads.toFile;
 export import fileFromPath = Uploads.fileFromPath;
 
-export namespace Aimon {
+export namespace Client {
   export import RequestOptions = Core.RequestOptions;
 
   export import Users = API.Users;
   export import User = API.User;
+  export import UserValidateResponse = API.UserValidateResponse;
   export import UserCreateParams = API.UserCreateParams;
   export import UserRetrieveParams = API.UserRetrieveParams;
 
   export import Models = API.Models;
+  export import ModelCreateResponse = API.ModelCreateResponse;
+  export import ModelRetrieveResponse = API.ModelRetrieveResponse;
+  export import ModelListResponse = API.ModelListResponse;
   export import ModelCreateParams = API.ModelCreateParams;
+  export import ModelRetrieveParams = API.ModelRetrieveParams;
 
   export import Applications = API.Applications;
+  export import ApplicationCreateResponse = API.ApplicationCreateResponse;
+  export import ApplicationRetrieveResponse = API.ApplicationRetrieveResponse;
+  export import ApplicationDeleteResponse = API.ApplicationDeleteResponse;
   export import ApplicationCreateParams = API.ApplicationCreateParams;
+  export import ApplicationRetrieveParams = API.ApplicationRetrieveParams;
+  export import ApplicationDeleteParams = API.ApplicationDeleteParams;
 
   export import Datasets = API.Datasets;
   export import Dataset = API.Dataset;
@@ -192,10 +205,18 @@ export namespace Aimon {
   export import DatasetListParams = API.DatasetListParams;
 
   export import Evaluations = API.Evaluations;
+  export import EvaluationCreateResponse = API.EvaluationCreateResponse;
   export import EvaluationRetrieveResponse = API.EvaluationRetrieveResponse;
   export import EvaluationCreateParams = API.EvaluationCreateParams;
   export import EvaluationRetrieveParams = API.EvaluationRetrieveParams;
-  export import EvaluationComputeMetricsParams = API.EvaluationComputeMetricsParams;
+
+  export import Analyze = API.Analyze;
+  export import AnalyzeCreateResponse = API.AnalyzeCreateResponse;
+  export import AnalyzeCreateParams = API.AnalyzeCreateParams;
+
+  export import Inference = API.Inference;
+  export import InferenceDetectResponse = API.InferenceDetectResponse;
+  export import InferenceDetectParams = API.InferenceDetectParams;
 }
 
-export default Aimon;
+export default Client;

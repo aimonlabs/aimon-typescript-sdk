@@ -2,9 +2,9 @@
 
 import { castToError, Headers } from './core';
 
-export class AimonError extends Error {}
+export class ClientError extends Error {}
 
-export class APIError extends AimonError {
+export class APIError extends ClientError {
   readonly status: number | undefined;
   readonly headers: Headers | undefined;
   readonly error: Object | undefined;
