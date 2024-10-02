@@ -1,0 +1,53 @@
+name: Publish TypeScript Package
+
+on:
+  push:
+    tags:
+      - "v*.*.*"  # Trigger this workflow only on version tags (e.g., v1.0.0)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x" # Ensure this matches your project's node version
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Extract version from tag
+        id: extract_version
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+
+      - name: Extract release notes from CHANGELOG.md
+        id: get_release_notes
+        run: |
+          TAG_NAME="v${{ env.VERSION }}"
+          RELEASE_NOTES=$(awk "/## $TAG_NAME/,/## /" CHANGELOG.md | sed '$d')
+          echo "release_notes=$RELEASE_NOTES" >> $GITHUB_ENV
+
+      - name: Build the package
+        run: yarn build
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Store your npm token in GitHub Secrets
+        run: |
+          # Update package.json version based on the tag
+          yarn version --new-version ${{ env.VERSION }} --no-git-tag-version
+          # Publish the dist folder contents
+          yarn publish dist/ --new-version ${{ env.VERSION }} --no-git-tag-version
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ env.VERSION }}" --notes "${{ env.release_notes }}"
+

@@ -1,8 +1,8 @@
 {
   "name": "aimon",
-  "version": "0.0.1-alpha.0",
-  "description": "The official TypeScript library for the Aimon API",
-  "author": "Aimon <dev-feedback@aimon.com>",
+  "version": "0.0.1-alpha.58",
+  "description": "The official TypeScript library for the AIMon API",
+  "author": "AIMon <info@aimon.ai>",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "type": "commonjs",
@@ -16,7 +16,8 @@
   "scripts": {
     "test": "./scripts/test",
     "build": "./scripts/build",
-    "prepublishOnly": "echo 'to publish, run yarn build && (cd dist; yarn publish)' && exit 1",
+    "prepublishOnly": "yarn build",
+    "publish": "yarn publish dist/ --no-git-tag-version",
     "format": "prettier --write --cache --cache-strategy metadata . !dist",
     "prepare": "if ./scripts/utils/check-is-in-git-install.sh; then ./scripts/build; fi",
     "tsn": "ts-node -r tsconfig-paths/register",
