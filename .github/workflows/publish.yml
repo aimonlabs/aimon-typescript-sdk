@@ -3,7 +3,7 @@ name: Publish TypeScript Package
 on:
   push:
     tags:
-      - "v*.*.*"  # Trigger this workflow only on version tags (e.g., v1.0.0)
+      - "v*.*.*" # Trigger this workflow only on version tags (e.g., v1.0.0)
 
 jobs:
   publish:
@@ -16,15 +16,17 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "16.x" # Ensure this matches your project's node version
-          cache: 'yarn'
+          node-version: "21.x"
+          cache: "yarn"
 
       - name: Install dependencies
         run: yarn install
 
       - name: Extract version from tag
         id: extract_version
-        run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Extract release notes from CHANGELOG.md
         id: get_release_notes
@@ -50,4 +52,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "v${{ env.VERSION }}" --notes "${{ env.release_notes }}"
-
