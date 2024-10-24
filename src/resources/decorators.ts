@@ -1,48 +1,31 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from "../resource";
-import * as Core from "../core";
-import * as AnalyzeAPI from "./analyze";
 
 export class Decorators extends APIResource {
-  /**
-   * Save and compute metrics
-   */
-  create(
-    body: AnalyzeCreateParams,
-    options?: Core.RequestOptions
-  ): Core.APIPromise<AnalyzeCreateResponse> {
-    return this._client.post("/v1/save-compute-metrics", { body, ...options });
-  }
-
   /**
    * Simplified method to create and analyze metrics by setting up the application and model.
    */
   async detect(
     valuesReturned: {
-      context_docs: string[];
-      output: string;
-      prompt: string;
+      generated_text: string;
+      context: string[];
       user_query: string;
       instructions?: string;
-      actual_request_timestamp?: string;
     },
     config: any = { hallucination: { detector_name: "default" } },
     asyncMode?: boolean,
     publish?: boolean,
     applicationName?: string,
     modelName?: string
-  ): Promise<AnalyzeCreateResponse> {
+  ): Promise<any> {
     try {
       // Validate required returned values
-      if (!valuesReturned.output) {
-        throw new Error("values_returned must contain 'generated_text'");
+      if (!valuesReturned.generated_text) {
+        throw new Error("valuesReturned must contain 'generated_text'");
       }
-      if (
-        !valuesReturned.context_docs ||
-        !Array.isArray(valuesReturned.context_docs)
-      ) {
-        throw new Error("values_returned must contain 'context'");
+      if (!valuesReturned.context || !Array.isArray(valuesReturned.context)) {
+        throw new Error("valuesReturned must contain 'context'");
       }
       if (config.instruction_adherence && !valuesReturned.instructions) {
         throw new Error(
@@ -55,101 +38,103 @@ export class Decorators extends APIResource {
         );
       }
 
-      if (publish) {
-        if (!modelName) {
-          throw new Error("Model name must be provided if publish is True");
-        }
-
-        if (!applicationName) {
-          throw new Error(
-            "Application name must be provided if publish is True"
-          );
-        }
-
-        // Create or retrieve the model
-        const modelType = "GPT-4";
-        const model = await this._client.models.create({
-          name: modelName,
-          type: modelType,
-          description: `This model is named ${modelName} and is of type ${modelType}`,
-        });
-
-        // Create or retrieve the application
-        const application = await this._client.applications.create({
-          name: applicationName,
-          model_name: model.name,
-          stage: "production",
-          type: "text",
-        });
-
-        if (!application.id || application.version === undefined) {
-          throw new Error("Application ID or version is undefined.");
-        }
-
-        // Prepare the payload
-        const completePayload: AnalyzeCreateParams.Body = {
-          application_id: application.id,
-          version: application.version,
-          output: valuesReturned.output,
-          context_docs: valuesReturned.context_docs,
-          prompt: valuesReturned.prompt || "No Prompt Specified",
+      // Check if publishing is enabled, and call the publish method if so
+      if (asyncMode) {
+        return await this.publishMetrics(
+          valuesReturned,
+          config,
+          applicationName,
+          modelName
+        );
+      } else {
+        // Call the detect API
+        const inferenceBody: any = {
+          context: valuesReturned.context,
+          generated_text: valuesReturned.generated_text,
           user_query: valuesReturned.user_query || "No User Query Specified",
           instructions: valuesReturned.instructions || "",
-          actual_request_timestamp:
-            valuesReturned.actual_request_timestamp || "",
           config: config,
         };
+        const detectResponse = await this._client.inference.detect([
+          inferenceBody,
+        ]);
 
-        return await this._client.analyze.create([completePayload]);
+        if (publish) {
+          return await this.publishMetrics(
+            valuesReturned,
+            config,
+            applicationName,
+            modelName
+          );
+        }
       }
+
+      // You can add further logic for non-publish flow here, if needed
     } catch (error) {
-      console.error("Error in analyzeProd:", error);
+      console.error("Error in detect:", error);
       throw error;
     }
   }
-}
-
-export interface AnalyzeCreateResponse {
-  message?: string;
 
   /**
-   * Status code representing the outcome of the operation
+   * Handles the logic for publishing metrics by setting up the application and model.
    */
-  status: number;
-}
+  private async publishMetrics(
+    valuesReturned: {
+      generated_text: string;
+      context: string[];
+      user_query: string;
+      instructions?: string;
+    },
+    config: any,
+    applicationName?: string,
+    modelName?: string
+  ): Promise<any> {
+    try {
+      if (!modelName) {
+        throw new Error("Model name must be provided if publish is True");
+      }
 
-export type AnalyzeCreateParams = Array<AnalyzeCreateParams.Body>;
+      if (!applicationName) {
+        throw new Error("Application name must be provided if publish is True");
+      }
 
-export namespace AnalyzeCreateParams {
-  export interface Body {
-    application_id: string;
+      // Create or retrieve the model
+      const modelType = "GPT-4";
+      const model = await this._client.models.create({
+        name: modelName,
+        type: modelType,
+        description: `This model is named ${modelName} and is of type ${modelType}`,
+      });
 
-    context_docs: Array<string>;
+      // Create or retrieve the application
+      const application = await this._client.applications.create({
+        name: applicationName,
+        model_name: model.name,
+        stage: "production",
+        type: "text",
+      });
 
-    output: string;
+      if (!application.id || application.version === undefined) {
+        throw new Error("Application ID or version is undefined.");
+      }
 
-    prompt: string;
+      // Prepare the payload for analysis
+      const completePayload: any = {
+        application_id: application.id,
+        version: application.version,
+        output: valuesReturned.generated_text,
+        context_docs: valuesReturned.context,
+        user_query: valuesReturned.user_query || "No User Query Specified",
+        instructions: valuesReturned.instructions || "",
+        config: config,
+      };
 
-    user_query: string;
-
-    version: string;
-
-    /**
-     * The timestamp when the actual request was made
-     */
-    actual_request_timestamp?: string;
-
-    evaluation_id?: string | null;
-
-    evaluation_run_id?: string | null;
-
-    instructions?: string;
-
-    config?: object;
+      // Send the payload for analysis
+      return await this._client.analyze.create([completePayload]);
+    } catch (error) {
+      console.error("Error in publishMetrics:", error);
+      throw error;
+    }
   }
-}
-
-export namespace Analyze {
-  export import AnalyzeCreateResponse = AnalyzeAPI.AnalyzeCreateResponse;
-  export import AnalyzeCreateParams = AnalyzeAPI.AnalyzeCreateParams;
 }
