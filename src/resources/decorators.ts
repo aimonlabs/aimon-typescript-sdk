@@ -19,21 +19,18 @@ export class Decorators extends APIResource {
     modelName?: string
   ): Promise<any> {
     try {
-      // Validate required returned values
+      // Validate required values
       if (!generatedText) {
         throw new Error("The method must contain 'generated_text'");
       }
       if (!context || !Array.isArray(context)) {
         throw new Error("The method must contain 'context'");
       }
+
+      // Conditionally validate 'instructions' if 'instruction_adherence' is specified in config
       if (config.instruction_adherence && !instructions) {
         throw new Error(
           "When instruction_adherence is specified in the config, 'instructions' must be provided"
-        );
-      }
-      if (instructions && !config.instruction_adherence) {
-        throw new Error(
-          "instruction_adherence must be specified in the config for returning 'instructions'"
         );
       }
 
@@ -49,13 +46,13 @@ export class Decorators extends APIResource {
           modelName
         );
       } else {
-        // Call the detect API
+        // Prepare the payload for detect API
         const inferenceBody: any = {
           context: context,
           generated_text: generatedText,
           user_query: userQuery || "No User Query Specified",
-          instructions: instructions || "",
           config: config,
+          ...(instructions ? { instructions } : {}), // Only include instructions if provided
         };
         const detectResponse = await this._client.inference.detect([
           inferenceBody,
@@ -75,8 +72,6 @@ export class Decorators extends APIResource {
           return detectResponse;
         }
       }
-
-      // You can add further logic for non-publish flow here, if needed
     } catch (error) {
       console.error("Error in detect:", error);
       throw error;
@@ -131,8 +126,8 @@ export class Decorators extends APIResource {
         output: generatedText,
         context_docs: context,
         user_query: userQuery || "No User Query Specified",
-        instructions: instructions || "",
         config: config,
+        ...(instructions ? { instructions } : {}), // Only include instructions if provided
       };
 
       // Send the payload for analysis
