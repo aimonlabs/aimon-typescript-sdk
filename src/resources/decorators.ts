@@ -1,18 +1,17 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from "../resource";
+import { EvaluationCreateResponse, Evaluations } from "./evaluations";
 
 export class Decorators extends APIResource {
   /**
    * Simplified method to create and analyze metrics by setting up the application and model.
    */
   async detect(
-    valuesReturned: {
-      generated_text: string;
-      context: string[];
-      user_query: string;
-      instructions?: string;
-    },
+    generatedText: string,
+    context: string[],
+    userQuery?: string,
+    instructions?: string,
     config: any = { hallucination: { detector_name: "default" } },
     asyncMode?: boolean,
     publish?: boolean,
@@ -21,18 +20,18 @@ export class Decorators extends APIResource {
   ): Promise<any> {
     try {
       // Validate required returned values
-      if (!valuesReturned.generated_text) {
-        throw new Error("valuesReturned must contain 'generated_text'");
+      if (!generatedText) {
+        throw new Error("The method must contain 'generated_text'");
       }
-      if (!valuesReturned.context || !Array.isArray(valuesReturned.context)) {
-        throw new Error("valuesReturned must contain 'context'");
+      if (!context || !Array.isArray(context)) {
+        throw new Error("The method must contain 'context'");
       }
-      if (config.instruction_adherence && !valuesReturned.instructions) {
+      if (config.instruction_adherence && !instructions) {
         throw new Error(
           "When instruction_adherence is specified in the config, 'instructions' must be provided"
         );
       }
-      if (valuesReturned.instructions && !config.instruction_adherence) {
+      if (instructions && !config.instruction_adherence) {
         throw new Error(
           "instruction_adherence must be specified in the config for returning 'instructions'"
         );
@@ -41,18 +40,21 @@ export class Decorators extends APIResource {
       // Check if publishing is enabled, and call the publish method if so
       if (asyncMode) {
         return await this.publishMetrics(
-          valuesReturned,
+          generatedText,
+          context,
           config,
+          userQuery,
+          instructions,
           applicationName,
           modelName
         );
       } else {
         // Call the detect API
         const inferenceBody: any = {
-          context: valuesReturned.context,
-          generated_text: valuesReturned.generated_text,
-          user_query: valuesReturned.user_query || "No User Query Specified",
-          instructions: valuesReturned.instructions || "",
+          context: context,
+          generated_text: generatedText,
+          user_query: userQuery || "No User Query Specified",
+          instructions: instructions || "",
           config: config,
         };
         const detectResponse = await this._client.inference.detect([
@@ -61,11 +63,16 @@ export class Decorators extends APIResource {
 
         if (publish) {
           return await this.publishMetrics(
-            valuesReturned,
+            generatedText,
+            context,
             config,
+            userQuery,
+            instructions,
             applicationName,
             modelName
           );
+        } else {
+          return detectResponse;
         }
       }
 
@@ -80,13 +87,11 @@ export class Decorators extends APIResource {
    * Handles the logic for publishing metrics by setting up the application and model.
    */
   private async publishMetrics(
-    valuesReturned: {
-      generated_text: string;
-      context: string[];
-      user_query: string;
-      instructions?: string;
-    },
+    generatedText: string,
+    context: string[],
     config: any,
+    userQuery?: string,
+    instructions?: string,
     applicationName?: string,
     modelName?: string
   ): Promise<any> {
@@ -123,10 +128,10 @@ export class Decorators extends APIResource {
       const completePayload: any = {
         application_id: application.id,
         version: application.version,
-        output: valuesReturned.generated_text,
-        context_docs: valuesReturned.context,
-        user_query: valuesReturned.user_query || "No User Query Specified",
-        instructions: valuesReturned.instructions || "",
+        output: generatedText,
+        context_docs: context,
+        user_query: userQuery || "No User Query Specified",
+        instructions: instructions || "",
         config: config,
       };
 
@@ -137,4 +142,160 @@ export class Decorators extends APIResource {
       throw error;
     }
   }
+
+  async evaluate(
+    applicationName: string,
+    modelName: string,
+    datasetCollectionName: string,
+    evaluationName: string,
+    headers: string[],
+    config: any = { hallucination: { detector_name: "default" } }
+  ): Promise<any> {
+    try {
+      // Validate  values
+      if (!headers || headers.length === 0) {
+        throw new Error("Headers must be a non-empty list");
+      }
+      if (!headers.includes("context_docs")) {
+        throw new Error("Headers must contain the column 'context_docs'");
+      }
+
+      if (!modelName) {
+        throw new Error("modelNamemust be provided");
+      }
+
+      if (!applicationName) {
+        throw new Error("applicationName must be provided");
+      }
+
+      if (!datasetCollectionName) {
+        throw new Error("datasetCollectionName must be provided");
+      }
+
+      if (!evaluationName) {
+        throw new Error("evaluationName must be provided");
+      }
+
+      // Create or retrieve the model
+      const modelType = "GPT-4";
+      const model = await this._client.models.create({
+        name: modelName,
+        type: modelType,
+        description: `This model is named ${modelName} and is of type ${modelType}`,
+      });
+
+      // Create or retrieve the application
+      const application = await this._client.applications.create({
+        name: applicationName,
+        model_name: model.name,
+        stage: "evaluation",
+        type: "text",
+      });
+
+      const datasetCollection = await this._client.datasets.collection.retrieve(
+        {
+          name: datasetCollectionName,
+        }
+      );
+
+      // Creates evaluation
+      let evaluation: EvaluationCreateResponse;
+
+      if (
+        datasetCollection &&
+        datasetCollection.id &&
+        model.id &&
+        application.id
+      ) {
+        evaluation = await this._client.evaluations.create({
+          name: "my_evaluation",
+          dataset_collection_id: datasetCollection.id,
+          model_id: model.id,
+          application_id: application.id,
+        });
+      } else {
+        throw new Error("Error creating evaluation");
+      }
+
+      // Creates evaluation run
+      let evaluationRun: Evaluations.RunCreateParams;
+      if (evaluation && evaluation.id) {
+        evaluationRun = await this._client.evaluations.run.create({
+          evaluation_id: evaluation.id,
+        });
+      } else {
+        throw new Error("Error creating evaluation run");
+      }
+
+      // Get all records from the datasets
+      let datasetCollectionRecords: any[] = [];
+      for (const datasetId of datasetCollection.dataset_ids) {
+        const datasetRecords = await this._client.datasets.records.list({
+          sha: datasetId,
+        });
+        datasetCollectionRecords.push(...datasetRecords); // Spread operator to merge records
+      }
+
+      const results: any[] = [];
+
+      for (const record of datasetCollectionRecords) {
+        // Validate the record for required fields
+        for (const header of headers) {
+          if (!(header in record)) {
+            throw new Error(
+              `Dataset record must contain the column '${header}' as specified in the 'headers'`
+            );
+          }
+        }
+        if (!("context_docs" in record)) {
+          throw new Error(
+            "Dataset record must contain the column 'context_docs'"
+          );
+        }
+
+        // Ensure context_docs is an array
+        const contextDocs = Array.isArray(record.context_docs)
+          ? record.context_docs
+          : [record.context_docs];
+
+        // Construct the payload for analysis
+        const payload: any = {
+          application_id: application.id,
+          version: application.version,
+          context_docs: contextDocs,
+          evaluation_id: evaluation.id,
+          evaluation_run_id: evaluationRun.id,
+          config: config,
+        };
+
+        // Optionally include fields in the payload if they exist
+        if (record.prompt) payload.prompt = record.prompt;
+        if (record.user_query) payload.user_query = record.user_query;
+        if (record.output) payload.output = record.output;
+
+        // Validate and include instructions if required by config
+        if (config.instruction_adherence && !record.instructions) {
+          throw new Error(
+            "When instruction_adherence is specified in the config, 'instructions' must be present in the dataset"
+          );
+        }
+        if (record.instructions && config.instruction_adherence) {
+          payload.instructions = record.instructions || "";
+        }
+
+        // Perform analysis and store the result
+        const analysis = await this._client.analyze.create([payload]);
+        results.push({ output: record.output, analysis });
+      }
+
+      return results;
+
+      // You can add further logic for non-publish flow here, if needed
+    } catch (error) {
+      console.error("Error in evaluate:", error);
+      throw error;
+    }
+  }
 }
+
+export namespace Decorators {}

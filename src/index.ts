@@ -1,10 +1,10 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import * as Errors from './error';
-import * as Uploads from './uploads';
-import { type Agent } from './_shims/index';
-import * as Core from './core';
-import * as API from './resources/index';
+import * as Errors from "./error";
+import * as Uploads from "./uploads";
+import { type Agent } from "./_shims/index";
+import * as Core from "./core";
+import * as API from "./resources/index";
 
 export interface ClientOptions {
   authHeader: string;
@@ -86,10 +86,14 @@ export class Client extends Core.APIClient {
    * @param {Core.Headers} opts.defaultHeaders - Default headers to include with every request to the API.
    * @param {Core.DefaultQuery} opts.defaultQuery - Default query parameters to include with every request to the API.
    */
-  constructor({ baseURL = Core.readEnv('CLIENT_BASE_URL'), authHeader, ...opts }: ClientOptions) {
+  constructor({
+    baseURL = Core.readEnv("CLIENT_BASE_URL"),
+    authHeader,
+    ...opts
+  }: ClientOptions) {
     if (authHeader === undefined) {
       throw new Errors.ClientError(
-        "Missing required client option authHeader; you need to instantiate the Client client with an authHeader option, like new Client({ authHeader: 'My Auth Header' }).",
+        "Missing required client option authHeader; you need to instantiate the Client client with an authHeader option, like new Client({ authHeader: 'My Auth Header' })."
       );
     }
 
@@ -118,13 +122,16 @@ export class Client extends Core.APIClient {
   datasets: API.Datasets = new API.Datasets(this);
   evaluations: API.Evaluations = new API.Evaluations(this);
   analyze: API.Analyze = new API.Analyze(this);
+  decorators: API.Decorators = new API.Decorators(this);
   inference: API.Inference = new API.Inference(this);
 
   protected override defaultQuery(): Core.DefaultQuery | undefined {
     return this._options.defaultQuery;
   }
 
-  protected override defaultHeaders(opts: Core.FinalRequestOptions): Core.Headers {
+  protected override defaultHeaders(
+    opts: Core.FinalRequestOptions
+  ): Core.Headers {
     return {
       ...super.defaultHeaders(opts),
       ...this._options.defaultHeaders,
@@ -217,6 +224,8 @@ export namespace Client {
   export import Inference = API.Inference;
   export import InferenceDetectResponse = API.InferenceDetectResponse;
   export import InferenceDetectParams = API.InferenceDetectParams;
+
+  export import Decorators = API.Decorators;
 }
 
 export default Client;
