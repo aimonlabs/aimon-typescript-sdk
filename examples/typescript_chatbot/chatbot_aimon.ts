@@ -28,10 +28,10 @@ const aimon = new Client({
 // Adding detector configurations
 const detectors = {
     hallucination: {detector_name: "hdm-1"},
-    instruction_adherence: {detector_name: "default"},
-    conciseness: {detector_name: "default"},
-    completeness: {detector_name: "default"},
-    toxicity: {detector_name: "default"},
+    // instruction_adherence: {detector_name: "default"},
+    // conciseness: {detector_name: "default"},
+    // completeness: {detector_name: "default"},
+    // toxicity: {detector_name: "default"},
 };
 
 function get_source_documents(response_string){
@@ -169,7 +169,7 @@ async function execute(query:string, user_instructions:string){
     // Getting response and other parameters from the chatbot
     const [[context, relevance_scores], user_query, instructions, generated_respone] = await am_chat(query, user_instructions, chatEngine);
 
-    const aimonResponse = await aimon.decorators.detect(
+    const aimonResponse = await aimon.detect(
         generated_respone,
         context,
         query,

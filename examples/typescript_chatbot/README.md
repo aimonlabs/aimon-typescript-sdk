@@ -14,9 +14,9 @@ This is a simple chatbot application built with LlamaIndex and TypeScript, which
 
 3. Install the dependencies: `npm install`
 
-4. Add the following keys in a .env file\
-`OPENAI_API_KEY="your_openai_key"`\
-`AIMON_API_KEY="your_aimon_key"` 
+4. Set the following keys as environment variables\
+`set OPENAI_API_KEY="your_openai_key"`\
+`set AIMON_API_KEY="your_aimon_key"` 
 
 5. Run the backend server script: `node chatbot_aimon.js`
 
@@ -34,4 +34,4 @@ The application starts by loading data on [Paul Graham's work history](https://p
 
 #### Integration with AIMon Detectors
 
-Our example uses the AIMon's [Hallucination detector](https://docs.aimon.ai/concepts/detectors/hallucination/) to analyze and detect hallucinations in the LLM's response. The `aimon.inference.detect` function takes the LLM's response and the respective context used to generate that response as arguments and returns the AIMon response along with a hallucination score and metadata. The `aimon.inference.detect` function can be modified to include other 4 detectors as well, namely [Conciseness, Completeness, Adherence and Toxicity](https://docs.aimon.ai/category/detectors).
+Our example uses the AIMon's [Hallucination detector](https://docs.aimon.ai/concepts/detectors/hallucination/) to analyze and detect hallucinations in the LLM's response. The `aimon.detect` function takes the LLM's response, the respective context used to generate that response, user query and instructions and the choice of detectors as arguments and returns the AIMon response along with a hallucination score and metadata. 4 other detectors, namely [Conciseness, Completeness, Instruction-Adherence and Toxicity](https://docs.aimon.ai/category/detectors) can be included as well, by adjusting the decorators variable in the `chatbot_aimon.js` file.

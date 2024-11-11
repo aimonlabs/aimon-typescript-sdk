@@ -1,4 +1,5 @@
 .env
+keys.txt
 data/
 node_modules/
 storage/
