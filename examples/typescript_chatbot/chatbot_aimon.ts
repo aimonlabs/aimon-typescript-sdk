@@ -25,6 +25,15 @@ const aimon = new Client({
     authHeader: `Bearer ${process.env.AIMON_API_KEY}`,
 });
 
+// Adding detector configurations
+const detectors = {
+    hallucination: {detector_name: "hdm-1"},
+    instruction_adherence: {detector_name: "default"},
+    conciseness: {detector_name: "default"},
+    completeness: {detector_name: "default"},
+    toxicity: {detector_name: "default"},
+};
+
 function get_source_documents(response_string){
     let contexts = []
     let relevance_scores = []
@@ -160,16 +169,24 @@ async function execute(query:string, user_instructions:string){
     // Getting response and other parameters from the chatbot
     const [[context, relevance_scores], user_query, instructions, generated_respone] = await am_chat(query, user_instructions, chatEngine);
 
-    const detectParams: Client.InferenceDetectParams.Body[] = [
-        {
-            context: context,
-            generated_text: generated_respone,
-        }
-        ];
+    const aimonResponse = await aimon.decorators.detect(
+        generated_respone,
+        context,
+        query,
+        detectors,
+        instructions
+      );
     
-    // Getting AIMon Response
-    const aimonResponse: Client.InferenceDetectResponse 
-    = await aimon.inference.detect(detectParams);
+    // const detectParams: Client.InferenceDetectParams.Body[] = [
+    //     {
+    //         context: context,
+    //         generated_text: generated_respone,
+    //     },
+    //     ];
+    
+    // // Getting AIMon Response
+    // const aimonResponse: Client.InferenceDetectResponse 
+    // = await aimon.inference.detect(detectParams);
     
     return [generated_respone, aimonResponse];
 }
