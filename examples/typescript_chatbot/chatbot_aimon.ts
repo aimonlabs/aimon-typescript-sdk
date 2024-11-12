@@ -1,4 +1,3 @@
-// // importing all the necessary modules
 import "dotenv/config";
 import { SimpleDirectoryReader, VectorStoreIndex, ContextChatEngine } from "llamaindex";
 import { storageContextFromDefaults, StorageContext } from "llamaindex";
@@ -11,12 +10,10 @@ import {fetchAndSaveHtml} from './fetch_document.js'
 import * as fs from 'fs';
 import * as path from 'path';
 
+const app = express();
+app.use(cors());       
+app.use(express.json());  
 
-const app = express();      // To use as a backend server
-app.use(cors());            // Enable CORS for all routes (optional, depending on your setup)
-app.use(express.json());    // Parse JSON bodies
-
-// Middleware to parse form data
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const openai_key = process.env.OPENAI_API_KEY;
@@ -25,7 +22,6 @@ const aimon = new Client({
     authHeader: `Bearer ${process.env.AIMON_API_KEY}`,
 });
 
-// Adding detector configurations
 const detectors = {
     hallucination: {detector_name: "hdm-1"},
     // instruction_adherence: {detector_name: "default"},
@@ -37,7 +33,6 @@ const detectors = {
 function get_source_documents(response_string){
     let contexts = []
     let relevance_scores = []
-    // Get source documents from the generated response (of type engine response)
     if (response_string.sourceNodes) {
         for(let node of response_string.sourceNodes){
             if((node.node)&&(node.node.text)&&(node.score)&&(node.score!=null)){
@@ -57,22 +52,17 @@ function get_source_documents(response_string){
 
 async function am_chat(user_query: string, user_instructions:string, chatEngine: ContextChatEngine){
     const response = await chatEngine.chat({message:user_query});
-    // console.log("User instructions: " + user_instructions)
     let context = get_source_documents(response);
-    // response.respone is of type string
     return [context, user_query, user_instructions, response.response]                            
-    // context itself is an array comprising of contexts and relevance_scores
 }
     
 async function load_data(){  
 
-    // fetch the context and store it in the data folder
     const url = 'https://paulgraham.com/worked.html'
     const folderPath = './data'; 
     const fileName = 'downloaded.html';
     const filePath = path.join(folderPath, fileName);
 
-    // Check if file exists
     if (fs.existsSync(filePath)){
         console.log("File exists");
     }
@@ -81,18 +71,13 @@ async function load_data(){
         await fetchAndSaveHtml(url, folderPath, fileName);
     }
 
-    // Setup LLM model
-    // console.log("Creating OpenAI LLM...")
     Settings.llm = new OpenAI({ 
         model:"gpt-4o",
         apiKey: openai_key });
-        // console.log("Finished creating OpenAI LLM...")
     
     Settings.chunkSize = 256;
-    Settings.chunkOverlap = 64; // keeping 1/4th of the chunkSize
+    Settings.chunkOverlap = 64;
     
-
-
     if (
     fs.existsSync('./storage/vector_store.json') && 
     fs.existsSync('./storage/index_store.json') && 
@@ -109,13 +94,12 @@ async function load_data(){
         });
         
         return loadedIndex;
-
     }
+    
     else{
 
         console.log("Embeddings do not exist OR are partially missing. Creating new embeddings...");
 
-        // In case of partially missing embeddings
         if(fs.existsSync('./storage')){
             await fs.promises.rm('./storage', {recursive:true});
         }
@@ -124,7 +108,6 @@ async function load_data(){
             persistDir: "./storage",
         });
        
-        // Create Document from data {stored locally in ./data directory}                      
         const reader = new SimpleDirectoryReader();
 
         const document = await reader.loadData({
@@ -141,16 +124,13 @@ async function load_data(){
 
 async function execute(query:string, user_instructions:string){
 
-    // Initialize chat history: 
     let chat_history = [{
             "role": "assistant",
             "content": "Ask me a question about Paul Graham's work experience"
         }];
 
-    // load data
     const index = load_data();
     
-    // Chat Engine
     const retriever = (await index).asRetriever({
         similarityTopK: 4,
       });
@@ -160,13 +140,13 @@ async function execute(query:string, user_instructions:string){
         chatHistory: chat_history,
         systemPrompt: 
         `You are a chatbot, able to answer questions on an essay about Paul Graham's Work experience.
-        You are supposed to answer user queries from the context provided to you, but can use the internet if information is not available in the context for a maximum of 20 words.
+        You are supposed to answer user queries from the context provided to you, but can use the internet 
+        if information is not available in the context for a maximum of 20 words.
         You should use the chat history to give a better experience to the user. 
         Please be friendly and polite.`
         ,
     });
     
-    // Getting response and other parameters from the chatbot
     const [[context, relevance_scores], user_query, instructions, generated_respone] = await am_chat(query, user_instructions, chatEngine);
 
     const aimonResponse = await aimon.detect(
@@ -177,27 +157,15 @@ async function execute(query:string, user_instructions:string){
         instructions
       );
     
-    // const detectParams: Client.InferenceDetectParams.Body[] = [
-    //     {
-    //         context: context,
-    //         generated_text: generated_respone,
-    //     },
-    //     ];
-    
-    // // Getting AIMon Response
-    // const aimonResponse: Client.InferenceDetectResponse 
-    // = await aimon.inference.detect(detectParams);
-    
     return [generated_respone, aimonResponse];
 }
 
 const port = 3000;
-// start the server
+
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 
-// Route to handle the form submission
 app.post('/api/query',  async (req, res) => {
     try{
         const query = await req.body.question; // query: string
