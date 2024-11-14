@@ -19,14 +19,14 @@ npm install aimon
 import Client from "aimon";
 
 // Create the AIMon client. You would need an API Key (that can be retrieved from the UI in your user profile).
-const aimon = new Client({ authHeader: "Bearer YOUR_API_KEY" });
+const client = new Client({ authHeader: "Bearer <AIMON_API_KEY>" });
 
 const generated_text = "your_generated_text";
 const context = ["your_context"];
 const userQuery = "your_user_query";
 
 // Analyze quality of the generated output using AIMon
-const response = await aimon.detect(generatedText, context, userQuery);
+const response = await client.detect(generatedText, context, userQuery);
 console.log("Response from detect:", response);
 ```
 
@@ -34,6 +34,8 @@ console.log("Response from detect:", response);
 
 <!-- prettier-ignore -->
 ```js
+import Client from "aimon";
+const client = new Client({ authHeader: "Bearer <AIMON_API_KEY>" });
 // Creates a new dataset from the local path csv file
 const createDataset = async (
   path: string,
@@ -51,7 +53,7 @@ const createDataset = async (
     json_data: json_data,
   };
 
-  const dataset: Client.Dataset = await aimon.datasets.create(params);
+  const dataset: Client.Dataset = await client.datasets.create(params);
   return dataset;
 };
 
@@ -73,7 +75,7 @@ let datasetCollection: Client.Datasets.CollectionCreateResponse | undefined;
 // Ensures that dataset1.sha and dataset2.sha are defined
 if (dataset1.sha && dataset2.sha) {
   // Creates dataset collection
-  datasetCollection = await aimon.datasets.collection.create({
+  datasetCollection = await client.datasets.collection.create({
     name: "my_first_dataset_collection",
     dataset_ids: [dataset1.sha, dataset2.sha],
     description: "This is a collection of two datasets.",
@@ -83,23 +85,22 @@ if (dataset1.sha && dataset2.sha) {
 }
 
 // Run an evaluation
-
 import Client from "aimon";
-const aimon = new Client({ authHeader: "Bearer API_KEY" });
+const client = new Client({ authHeader: "Bearer <AIMON_API_KEY>" });
 
-headers = ["context_docs", "user_query", "output"];
-config = {
+const headers = ["context_docs", "user_query", "output"];
+const config = {
   hallucination: { detector_name: "default" },
   instruction_adherence: { detector_name: "default" },
 };
-results = aimon.evaluate(
-  (applicationName = "my_app"),
-  (modelName = "gpt-4o"),
+const results = client.evaluate(
+  "my_application_name", //Application Name
+  "my_model_name", // Model name
   //this dataset collection must exist in the Aimon platform
-  (datasetCollectionName = "my_dataset_collection"),
-  (evaluationName = "my_evaluation"),
-  (headers = headers),
-  (config = config)
+  "my_first_dataset_collection",
+  "my_evaluation_name", // Evaluation name,
+  headers,
+  config
 );
 ```
 
@@ -109,218 +110,16 @@ results = aimon.evaluate(
 import Client from "aimon";
 
 // Create the AIMon client. You would need an API Key (that can be retrieved from the UI in your user profile).
-const aimon = new Client({
+const client = new Client({
   authHeader: "Bearer: <AIMON_API_KEY>",
 });
 
-const response = await aimon.applications.delete({
+const response = await client.applications.delete({
   name: "application_name",
   stage: "application_stage",
   version: "version",
 });
 ```
-
-### Request & Response types
-
-This library includes TypeScript definitions for all request params and response fields. You may import and use them like so:
-
-<!-- prettier-ignore -->
-```ts
-import Aimon from 'aimon';
-
-const aimon = new Aimon({
-  apiKey: 'My API Key',
-});
-
-async function main() {
-  const params: Aimon.UserRetrieveParams = { email: 'REPLACE_ME' };
-  const user: Aimon.User = await aimon.users.retrieve(params);
-}
-
-main();
-```
-
-Documentation for each method, request param, and response field are available in docstrings and will appear on hover in most modern editors.
-
-## Handling errors
-
-When the library is unable to connect to the API,
-or if the API returns a non-success status code (i.e., 4xx or 5xx response),
-a subclass of `APIError` will be thrown:
-
-<!-- prettier-ignore -->
-```ts
-async function main() {
-  const user = await aimon.users.retrieve({ email: 'REPLACE_ME' }).catch(async (err) => {
-    if (err instanceof Aimon.APIError) {
-      console.log(err.status); // 400
-      console.log(err.name); // BadRequestError
-      console.log(err.headers); // {server: 'nginx', ...}
-    } else {
-      throw err;
-    }
-  });
-}
-
-main();
-```
-
-Error codes are as followed:
-
-| Status Code | Error Type                 |
-| ----------- | -------------------------- |
-| 400         | `BadRequestError`          |
-| 401         | `AuthenticationError`      |
-| 403         | `PermissionDeniedError`    |
-| 404         | `NotFoundError`            |
-| 422         | `UnprocessableEntityError` |
-| 429         | `RateLimitError`           |
-| >=500       | `InternalServerError`      |
-| N/A         | `APIConnectionError`       |
-
-### Retries
-
-Certain errors will be automatically retried 2 times by default, with a short exponential backoff.
-Connection errors (for example, due to a network connectivity problem), 408 Request Timeout, 409 Conflict,
-429 Rate Limit, and >=500 Internal errors will all be retried by default.
-
-You can use the `maxRetries` option to configure or disable this:
-
-<!-- prettier-ignore -->
-```js
-// Configure the default for all requests:
-const aimon = new Aimon({
-  maxRetries: 0, // default is 2
-});
-
-// Or, configure per-request:
-await aimon.users.retrieve({ email: 'REPLACE_ME' }, {
-  maxRetries: 5,
-});
-```
-
-### Timeouts
-
-Requests time out after 1 minute by default. You can configure this with a `timeout` option:
-
-<!-- prettier-ignore -->
-```ts
-// Configure the default for all requests:
-const aimon = new Aimon({
-  timeout: 20 * 1000, // 20 seconds (default is 1 minute)
-});
-
-// Override per-request:
-await aimon.users.retrieve({ email: 'REPLACE_ME' }, {
-  timeout: 5 * 1000,
-});
-```
-
-On timeout, an `APIConnectionTimeoutError` is thrown.
-
-Note that requests which time out will be [retried twice by default](#retries).
-
-## Advanced Usage
-
-### Accessing raw Response data (e.g., headers)
-
-The "raw" `Response` returned by `fetch()` can be accessed through the `.asResponse()` method on the `APIPromise` type that all methods return.
-
-You can also use the `.withResponse()` method to get the raw `Response` along with the parsed data.
-
-<!-- prettier-ignore -->
-```ts
-const aimon = new Aimon();
-
-const response = await aimon.users.retrieve({ email: 'REPLACE_ME' }).asResponse();
-console.log(response.headers.get('X-My-Header'));
-console.log(response.statusText); // access the underlying Response object
-
-const { data: user, response: raw } = await aimon.users.retrieve({ email: 'REPLACE_ME' }).withResponse();
-console.log(raw.headers.get('X-My-Header'));
-console.log(user.id);
-```
-
-### Making custom/undocumented requests
-
-This library is typed for convenient access to the documented API. If you need to access undocumented
-endpoints, params, or response properties, the library can still be used.
-
-#### Undocumented endpoints
-
-To make requests to undocumented endpoints, you can use `client.get`, `client.post`, and other HTTP verbs.
-Options on the client, such as retries, will be respected when making these requests.
-
-```ts
-await client.post("/some/path", {
-  body: { some_prop: "foo" },
-  query: { some_query_arg: "bar" },
-});
-```
-
-#### Undocumented request params
-
-To make requests using undocumented parameters, you may use `// @ts-expect-error` on the undocumented
-parameter. This library doesn't validate at runtime that the request matches the type, so any extra values you
-send will be sent as-is.
-
-```ts
-client.foo.create({
-  foo: "my_param",
-  bar: 12,
-  // @ts-expect-error baz is not yet public
-  baz: "undocumented option",
-});
-```
-
-For requests with the `GET` verb, any extra params will be in the query, all other requests will send the
-extra param in the body.
-
-If you want to explicitly send an extra argument, you can do so with the `query`, `body`, and `headers` request
-options.
-
-#### Undocumented response properties
-
-To access undocumented response properties, you may access the response object with `// @ts-expect-error` on
-the response object, or cast the response object to the requisite type. Like the request params, we do not
-validate or strip extra properties from the response from the API.
-
-### Customizing the fetch client
-
-By default, this library uses `node-fetch` in Node, and expects a global `fetch` function in other environments.
-
-If you would prefer to use a global, web-standards-compliant `fetch` function even in a Node environment,
-(for example, if you are running Node with `--experimental-fetch` or using NextJS which polyfills with `undici`),
-add the following import before your first import `from "Aimon"`:
-
-```ts
-// Tell TypeScript and the package to use the global web fetch instead of node-fetch.
-// Note, despite the name, this does not add any polyfills, but expects them to be provided if needed.
-import "aimon/shims/web";
-import Aimon from "aimon";
-```
-
-### Logging and middleware
-
-You may also provide a custom `fetch` function when instantiating the client,
-which can be used to inspect or alter the `Request` or `Response` before/after each request:
-
-```ts
-import { fetch } from "undici"; // as one example
-import Aimon from "aimon";
-
-const client = new Aimon({
-  fetch: async (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-    console.log("About to make a request", url, init);
-    const response = await fetch(url, init);
-    console.log("Got response", response);
-    return response;
-  },
-});
-```
-
-Note that if given a `DEBUG=true` environment variable, this library will log all requests and responses automatically.
-This is intended for debugging purposes only and may change in the future without notice.
 
 ### Configuring an HTTP(S) Agent (e.g., for proxies)
 
