@@ -2,6 +2,7 @@
 
 import { APIResource } from "../resource";
 import { EvaluationCreateResponse, Evaluations } from "./evaluations";
+import { InferenceDetectParams } from "./inference";
 
 export class Decorators extends APIResource {
   /**
@@ -11,8 +12,10 @@ export class Decorators extends APIResource {
     generatedText: string,
     context: string[],
     userQuery?: string,
+    config: any = {
+      hallucination: { detector_name: "default" },
+    },
     instructions?: string,
-    config: any = { hallucination: { detector_name: "default" } },
     asyncMode?: boolean,
     publish?: boolean,
     applicationName?: string,
@@ -59,7 +62,7 @@ export class Decorators extends APIResource {
         ]);
 
         if (publish) {
-          return await this.publishMetrics(
+          this.publishMetrics(
             generatedText,
             context,
             config,
@@ -67,10 +70,9 @@ export class Decorators extends APIResource {
             instructions,
             applicationName,
             modelName
-          );
-        } else {
-          return detectResponse;
+          ).catch((error) => console.error("Error in publishMetrics:", error)); // Handle errors gracefully
         }
+        return detectResponse;
       }
     } catch (error) {
       console.error("Error in detect:", error);

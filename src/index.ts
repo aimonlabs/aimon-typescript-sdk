@@ -125,6 +125,50 @@ export class Client extends Core.APIClient {
   decorators: API.Decorators = new API.Decorators(this);
   inference: API.Inference = new API.Inference(this);
 
+  // Assuming detect expects specific types for the arguments, replace these types with the correct ones
+  async detect(
+    generatedText: string,
+    context: string[],
+    userQuery?: string,
+    config?: any,
+    instructions?: string,
+    asyncMode?: boolean,
+    publish?: boolean,
+    applicationName?: string,
+    modelName?: string
+  ): Promise<any> {
+    return await this.decorators.detect(
+      generatedText,
+      context,
+      userQuery,
+      config,
+      instructions,
+      asyncMode,
+      publish,
+      applicationName,
+      modelName
+    );
+  }
+
+  // Assuming evaluate expects specific types for the arguments
+  async evaluate(
+    applicationName: string,
+    modelName: string,
+    datasetCollectionName: string,
+    evaluationName: string,
+    headers: string[],
+    config?: any
+  ): Promise<any> {
+    return await this.decorators.evaluate(
+      applicationName,
+      modelName,
+      datasetCollectionName,
+      evaluationName,
+      headers,
+      config
+    );
+  }
+
   protected override defaultQuery(): Core.DefaultQuery | undefined {
     return this._options.defaultQuery;
   }
