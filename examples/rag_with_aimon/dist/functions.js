@@ -70,19 +70,3 @@ export function get_source_documents(response_string) {
     }
     return [contexts, relevance_scores];
 }
-// export function build_context_from_sourceNodes(source_nodes){
-//   let context = []
-//   for(let node of sourceNodes){
-//             if((node.node)&&(node.node.text)&&(node.score)&&(node.score!=null)){
-//                 contexts.push(node.node.text);
-//                 relevance_scores.push(node.score);
-//             }
-//             else if((node.text)&&(node.score)&&(node.score!=null)){
-//                 contexts.push(node.text);
-//                 relevance_scores.push(node.score);
-//             }
-//             else{
-//                 console.log("Node does not have the required attributes.");
-//             } } }
-//     else{console.log("No source_nodes attribute found in the chat response.");}
-//     return [contexts, relevance_scores]

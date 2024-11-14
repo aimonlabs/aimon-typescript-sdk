@@ -115,29 +115,3 @@ const aimonResponse_2 = await aimon.detect( response_2.response,
 
 console.log(`\nLLM response: ${response_2}`)
 console.log(`\nAIMon response: ${JSON.stringify(aimonResponse_2)}`)
-
-
-// // // // // // // // // OPTIMIZE WITH QUERY ENGINE INSTEAD OF A CHAT ENGINE
-// // // // // // // // // BUILD CONTEXT FROM SOURCE NODES
-
-
-
-// // Assemble the query engine
-// const queryEngine = index.asQueryEngine({retriever: index.asRetriever({similarityTopK: 5})});
-
-// // const chatbot = new ContextChatEngine({ retriever, systemPrompt: system_prompt});
-
-// // Define your query
-// const query = "What is the full set of labels that AIMon's toxicity detector generates?";
-
-// // Define the instructions you want to test for compliance, in order to 
-// // assess how well a Large Language Model (LLM) adheres to specific instructions.
-// const instructions = "1. Limit the response to under 300 words.";
-
-// // Get response
-// const { response, sourceNodes } = await queryEngine.query({query:query});
-// // const response = await chatbot.chat({message:query});
-
-// console.log(response)
-// console.log()
-// console.log(sourceNodes)
