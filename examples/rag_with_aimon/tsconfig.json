@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",           
+    "module": "ES2022",        
+    "moduleResolution": "Node",
+    "outDir": "./dist",         // output directory for compiled files
+    "rootDir": "./src",         // source directory
+    "esModuleInterop": true,    // for compatibility with CommonJS
+    "strict": true,             // enable strict type checking
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "skipLibCheck": true 
+  },
+  "include": ["src/**/*"],      // include all .ts files in src
+  "exclude": ["node_modules"]   // exclude node_modules
+}
