@@ -5,9 +5,10 @@ import { OpenAI, OpenAIEmbedding, SentenceSplitter, Settings } from "llamaindex"
 import { fetch_from_sitemap, extract_text_from_url, get_source_documents } from './functions.js';
 //Setting up the global configurations
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-Settings.embedModel = new OpenAIEmbedding({ model: "text-embedding-ada-002" });
+// Settings.embedModel = new OpenAIEmbedding({model: "text-embedding-ada-002"});
+Settings.embedModel = new OpenAIEmbedding({ model: "text-embedding-3-small" });
 Settings.llm = new OpenAI({ model: "gpt-4o-mini", temperature: 0.1 });
-Settings.nodeParser = new SentenceSplitter({ chunkSize: 1024, });
+Settings.nodeParser = new SentenceSplitter();
 const aimon = new Client({ authHeader: `Bearer ${process.env.AIMON_API_KEY}` });
 // Fetch the URLs from sitemap
 const aimon_urls = await fetch_from_sitemap("https://docs.aimon.ai/sitemap.xml");
@@ -67,6 +68,24 @@ true, // publish = True
 );
 console.log(`\nLLM response: ${response}`);
 console.log(`\nAIMon response: ${JSON.stringify(aimonResponse)}`);
+// // Saving context and generated response for debugging
+// // Write the LLM response string to a text file
+// fs.writeFile('response_1.txt', response.response, (err) => {
+//   if (err) {
+//     console.error('Error writing to text file:', err);
+//   } else {
+//     console.log('String has been written to response_1.txt');
+//   }
+// });
+// const data = context.map(item => `"${item}"`).join("\n");
+// // Write the context to a CSV file
+// fs.writeFile('context_1', data, (err) => {
+//   if (err) {
+//     console.error('Error writing to CSV file:', err);
+//   } else {
+//     console.log('Data has been written to context_1.csv');
+//   }
+// });
 // // //  //   Fixing the hallucination by supplying additional context   // // //  // 
 // Generating documents on AIMon's toxicity detection
 const document_on_detectors = await extract_text_from_url('https://docs.aimon.ai/category/detectors');
@@ -84,3 +103,21 @@ true, // publish = True
 );
 console.log(`\nLLM response: ${response_2}`);
 console.log(`\nAIMon response: ${JSON.stringify(aimonResponse_2)}`);
+// // Saving context and generated response for debugging
+// // Write the LLM response string to a text file
+// fs.writeFile('response_2.txt', response_2.response, (err) => {
+//   if (err) {
+//     console.error('Error writing to text file:', err);
+//   } else {
+//     console.log('String has been written to response_2.txt');
+//   }
+// });
+// const data_2 = context_2.map(item => `"${item}"`).join("\n");
+// // Write the context to a CSV file
+// fs.writeFile('context_2', data_2, (err) => {
+//   if (err) {
+//     console.error('Error writing to CSV file:', err);
+//   } else {
+//     console.log('Data has been written to context_2.csv');
+//   }
+// });
