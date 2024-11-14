@@ -7,7 +7,8 @@ import { fetch_from_sitemap, extract_text_from_url, get_source_documents } from 
 
 //Setting up the global configurations
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-Settings.embedModel = new OpenAIEmbedding({model: "text-embedding-3-small"});
+Settings.embedModel = new OpenAIEmbedding({model: "text-embedding-ada-002"});
+// Settings.embedModel = new OpenAIEmbedding({model: "text-embedding-3-small"});
 Settings.llm = new OpenAI({ model: "gpt-4o-mini", temperature: 0.1 });
 Settings.nodeParser = new SentenceSplitter();
 const aimon = new Client({authHeader: `Bearer ${process.env.AIMON_API_KEY}`});
