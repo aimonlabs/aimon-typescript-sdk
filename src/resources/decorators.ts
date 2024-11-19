@@ -2,7 +2,6 @@
 
 import { APIResource } from "../resource";
 import { EvaluationCreateResponse, Evaluations } from "./evaluations";
-import { InferenceDetectParams } from "./inference";
 
 export class Decorators extends APIResource {
   /**
@@ -22,120 +21,26 @@ export class Decorators extends APIResource {
     modelName?: string
   ): Promise<any> {
     try {
-      // Validate required values
-      if (!generatedText) {
-        throw new Error("The method must contain 'generated_text'");
-      }
-      if (!context || !Array.isArray(context)) {
-        throw new Error("The method must contain 'context'");
-      }
-
-      // Conditionally validate 'instructions' if 'instruction_adherence' is specified in config
-      if (config.instruction_adherence && !instructions) {
-        throw new Error(
-          "When instruction_adherence is specified in the config, 'instructions' must be provided"
-        );
-      }
-
-      // Check if publishing is enabled, and call the publish method if so
-      if (asyncMode) {
-        return await this.publishMetrics(
-          generatedText,
-          context,
-          config,
-          userQuery,
-          instructions,
-          applicationName,
-          modelName
-        );
-      } else {
-        // Prepare the payload for detect API
-        const inferenceBody: any = {
-          context: context,
-          generated_text: generatedText,
-          user_query: userQuery || "No User Query Specified",
-          config: config,
-          ...(instructions ? { instructions } : {}), // Only include instructions if provided
-        };
-        const detectResponse = await this._client.inference.detect([
-          inferenceBody,
-        ]);
-
-        if (publish) {
-          this.publishMetrics(
-            generatedText,
-            context,
-            config,
-            userQuery,
-            instructions,
-            applicationName,
-            modelName
-          ).catch((error) => console.error("Error in publishMetrics:", error)); // Handle errors gracefully
-        }
-        return detectResponse;
-      }
-    } catch (error) {
-      console.error("Error in detect:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Handles the logic for publishing metrics by setting up the application and model.
-   */
-  private async publishMetrics(
-    generatedText: string,
-    context: string[],
-    config: any,
-    userQuery?: string,
-    instructions?: string,
-    applicationName?: string,
-    modelName?: string
-  ): Promise<any> {
-    try {
-      if (!modelName) {
-        throw new Error("Model name must be provided if publish is True");
-      }
-
-      if (!applicationName) {
-        throw new Error("Application name must be provided if publish is True");
-      }
-
-      // Create or retrieve the model
-      const modelType = "GPT-4";
-      const model = await this._client.models.create({
-        name: modelName,
-        type: modelType,
-        description: `This model is named ${modelName} and is of type ${modelType}`,
-      });
-
-      // Create or retrieve the application
-      const application = await this._client.applications.create({
-        name: applicationName,
-        model_name: model.name,
-        stage: "production",
-        type: "text",
-      });
-
-      if (!application.id || application.version === undefined) {
-        throw new Error("Application ID or version is undefined.");
-      }
-
-      // Prepare the payload for analysis
-      const completePayload: any = {
-        application_id: application.id,
-        version: application.version,
-        output: generatedText,
-        context_docs: context,
+      // Prepare the payload for detect API
+      const inferenceBody: any = {
+        context: context,
+        generated_text: generatedText,
         user_query: userQuery || "No User Query Specified",
         config: config,
         ...(instructions ? { instructions } : {}), // Only include instructions if provided
+        ...(asyncMode ? { async_mode: asyncMode } : {}), // Only include async_mode if provided
+        ...(publish ? { publish } : {}), // Only include publish if provided
+        ...(applicationName ? { application_name: applicationName } : {}), // Only include application_name if provided
+        ...(modelName ? { model_name: modelName } : {}), // Only include model_name if provided
       };
 
-      // Send the payload for analysis
-      return await this._client.analyze.create([completePayload]);
+      const detectResponse = await this._client.inference.detect([
+        inferenceBody,
+      ]);
+
+      return detectResponse;
     } catch (error) {
-      console.error("Error in publishMetrics:", error);
+      console.error("Error in detect:", error);
       throw error;
     }
   }
