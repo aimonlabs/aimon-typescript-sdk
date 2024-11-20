@@ -1,6 +1,6 @@
 import "dotenv/config";
 import * as fs from 'fs';
-import {Client} from "aimon";
+import Client from "aimon";
 import {Document, VectorStoreIndex, ContextChatEngine} from "llamaindex";
 import {OpenAI, OpenAIEmbedding, SentenceSplitter, Settings} from "llamaindex";
 import { fetch_from_sitemap, extract_text_from_url, get_source_documents } from './functions.js';
