@@ -6,9 +6,8 @@
 
 3. Install the dependencies: `npm install`
 
-4. Set the following keys as environment variables\
-`set OPENAI_API_KEY="your_openai_key"`\
-`set AIMON_API_KEY="your_aimon_key"` 
+4. Create a .env file in the same directory and set the following keys to be used as environment variables\
+`OPENAI_API_KEY=your_openai_key`\
+`AIMON_API_KEY=your_aimon_key` 
 
-5. Run the application: `npm start`
-
+5. Run the application using `npm start`
