@@ -1,0 +1,8 @@
+.env
+init_npm.txt
+!package-lock.json
+!dist
+response_1.txt
+response_2.txt
+context_1.csv
+context_2.csv

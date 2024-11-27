@@ -1,0 +1,9 @@
+.env
+keys.txt
+data/
+node_modules/
+storage/
+!package-lock.json
+test_dataset.csv
+test_eval.ts
+test_eval.js

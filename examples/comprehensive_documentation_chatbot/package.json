@@ -1,0 +1,31 @@
+{
+  "name": "ts_rag",
+  "version": "1.0.0",
+  "main": "dist/chatbot.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/chatbot.js",
+    "dev": "node dist/chatbot.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/node": "^22.9.0",
+    "@types/xml2js": "^0.4.14",
+    "dotenv": "^16.4.5",
+    "nodemon": "^3.1.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "aimon": "^0.0.1-alpha.78",
+    "axios": "^1.7.7",
+    "cheerio": "^1.0.0",
+    "llamaindex": "^0.8.12",
+    "xml2js": "^0.6.2"
+  }
+}

@@ -110,7 +110,7 @@
     parentDiv.appendChild(answer)
 
     const answer2 = document.createElement('div')
-    answer2.innerHTML = JSON.stringify(data.message_aimon[0])
+    answer2.innerHTML = `AIMon Response: ${JSON.stringify(data.message_aimon[0])}`
     answer2.classList.add("box", "answer")
     parentDiv.appendChild(answer2)
     }
