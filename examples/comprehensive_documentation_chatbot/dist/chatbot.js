@@ -5,14 +5,19 @@ import { OpenAI, OpenAIEmbedding, SentenceSplitter, Settings } from "llamaindex"
 import { fetch_from_sitemap, extract_text_from_url, get_source_documents } from './functions.js';
 //Setting up the global configurations
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-Settings.embedModel = new OpenAIEmbedding({ model: "text-embedding-ada-002" });
-// Settings.embedModel = new OpenAIEmbedding({model: "text-embedding-3-small"});
+// Settings.embedModel = new OpenAIEmbedding({model: "text-embedding-ada-002"});
+Settings.embedModel = new OpenAIEmbedding({ model: "text-embedding-3-small" });
 Settings.llm = new OpenAI({ model: "gpt-4o-mini", temperature: 0.1 });
 Settings.nodeParser = new SentenceSplitter();
 const aimon = new Client({ authHeader: `Bearer ${process.env.AIMON_API_KEY}` });
 // Fetch the URLs from sitemap
-const aimon_urls = await fetch_from_sitemap("https://docs.aimon.ai/sitemap.xml");
-// Convert the URLs to LlamaIndex documents
+let aimon_urls = await fetch_from_sitemap("https://docs.aimon.ai/sitemap.xml");
+// Remove the recipes from the list of URLs
+const urlsToRemove = ["https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot",
+    "https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot_TS",
+    "https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot_aperturedb",];
+aimon_urls = aimon_urls.filter(url => !urlsToRemove.includes(url));
+// Extract text from the URLs and create LlamaIndex documents
 const documents = [];
 for (let i = 0; i < aimon_urls.length; i++) {
     const url = aimon_urls[i];
@@ -51,6 +56,7 @@ const system_prompt = " Please be professional and polite.\
 const chatbot = new ContextChatEngine({ retriever, systemPrompt: system_prompt });
 // Define your query
 const query = "What is the full set of labels that AIMon's toxicity detector generates?";
+// const query = "How many detectors does AIMon provide to the end users?";
 // Define the instructions you want to test for compliance, in order to 
 // assess how well a Large Language Model (LLM) adheres to specific instructions.
 const instructions = "1. Limit the response to under 300 words.";
