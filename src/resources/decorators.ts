@@ -9,7 +9,7 @@ export class Decorators extends APIResource {
    */
   async detect(
     generatedText: string,
-    context: string[] | string,
+    context: string | string[],
     userQuery?: string,
     config: any = {
       hallucination: { detector_name: "default" },
