@@ -9,7 +9,7 @@ export class Decorators extends APIResource {
    */
   async detect(
     generatedText: string,
-    context: string[],
+    context: string[] | string,
     userQuery?: string,
     config: any = {
       hallucination: { detector_name: "default" },
@@ -25,7 +25,7 @@ export class Decorators extends APIResource {
       const inferenceBody: any = {
         context: context,
         generated_text: generatedText,
-        user_query: userQuery || "No User Query Specified",
+        ...(userQuery ? { user_query: userQuery } : {}), // Only include user_query if provided
         config: config,
         ...(instructions ? { instructions } : {}), // Only include instructions if provided
         ...(asyncMode ? { async_mode: asyncMode } : {}), // Only include async_mode if provided
