@@ -110,7 +110,7 @@ export class Decorators extends APIResource {
         application.id
       ) {
         evaluation = await this._client.evaluations.create({
-          name: "my_evaluation",
+          name: evaluationName,
           dataset_collection_id: datasetCollection.id,
           model_id: model.id,
           application_id: application.id,
