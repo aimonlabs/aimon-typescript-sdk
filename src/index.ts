@@ -181,7 +181,7 @@ export class Client extends Core.APIClient {
   // Assuming detect expects specific types for the arguments, replace these types with the correct ones
   async detect(
     generatedText: string,
-    context: string[],
+    context: string | string[],
     userQuery?: string,
     config?: any,
     instructions?: string,
