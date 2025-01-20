@@ -2,7 +2,6 @@
 
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
-import * as MetricsAPI from './metrics';
 
 export class Metrics extends APIResource {
   /**
@@ -156,11 +155,13 @@ export interface MetricGetEvaluationRunMetricsParams {
   version?: string;
 }
 
-export namespace Metrics {
-  export import MetricRetrieveResponse = MetricsAPI.MetricRetrieveResponse;
-  export import MetricGetEvaluationMetricsResponse = MetricsAPI.MetricGetEvaluationMetricsResponse;
-  export import MetricGetEvaluationRunMetricsResponse = MetricsAPI.MetricGetEvaluationRunMetricsResponse;
-  export import MetricRetrieveParams = MetricsAPI.MetricRetrieveParams;
-  export import MetricGetEvaluationMetricsParams = MetricsAPI.MetricGetEvaluationMetricsParams;
-  export import MetricGetEvaluationRunMetricsParams = MetricsAPI.MetricGetEvaluationRunMetricsParams;
+export declare namespace Metrics {
+  export {
+    type MetricRetrieveResponse as MetricRetrieveResponse,
+    type MetricGetEvaluationMetricsResponse as MetricGetEvaluationMetricsResponse,
+    type MetricGetEvaluationRunMetricsResponse as MetricGetEvaluationRunMetricsResponse,
+    type MetricRetrieveParams as MetricRetrieveParams,
+    type MetricGetEvaluationMetricsParams as MetricGetEvaluationMetricsParams,
+    type MetricGetEvaluationRunMetricsParams as MetricGetEvaluationRunMetricsParams,
+  };
 }

@@ -1,8 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { APIResource } from "../resource";
-import * as Core from "../core";
-import * as InferenceAPI from "./inference";
+import { APIResource } from '../resource';
+import * as Core from '../core';
 
 export class Inference extends APIResource {
   /**
@@ -10,14 +9,13 @@ export class Inference extends APIResource {
    */
   detect(
     body: InferenceDetectParams,
-    options?: Core.RequestOptions
+    options?: Core.RequestOptions,
   ): Core.APIPromise<InferenceDetectResponse> {
-    return this._client.post("/v2/detect", { body, ...options });
+    return this._client.post('/v2/detect', { body, ...options });
   }
 }
 
-export type InferenceDetectResponse =
-  Array<InferenceDetectResponse.InferenceDetectResponseItem>;
+export type InferenceDetectResponse = Array<InferenceDetectResponse.InferenceDetectResponseItem>;
 
 export namespace InferenceDetectResponse {
   export interface InferenceDetectResponseItem {
@@ -43,34 +41,34 @@ export namespace InferenceDetectParams {
     generated_text: string;
 
     /**
+     * The application name for publishing metrics.
+     */
+    application_name?: string;
+
+    /**
+     * Indicates whether to run the application in async mode.
+     */
+    async_mode?: boolean;
+
+    /**
      * Configuration for the detection
      */
     config?: Body.Config;
 
     /**
-     * The user's query
+     * The model name for publishing metrics for an application.
      */
-    user_query?: string;
+    model_name?: string;
 
     /**
-     * Whether to run the detection asynchronously
-     */
-    async_mode?: boolean;
-
-    /**
-     * Whether to publish the detection result
+     * Indicates whether to publish metrics.
      */
     publish?: boolean;
 
     /**
-     * The name of the application related to the detection
+     * The user's query
      */
-    application_name?: string;
-
-    /**
-     * The name of the model related to the detection
-     */
-    model_name?: string;
+    user_query?: string;
   }
 
   export namespace Body {
@@ -84,7 +82,7 @@ export namespace InferenceDetectParams {
 
       hallucination?: Config.Hallucination;
 
-      "hallucination_v0.2"?: Config.HallucinationV0_2;
+      'hallucination_v0.2'?: Config.HallucinationV0_2;
 
       instruction_adherence?: Config.InstructionAdherence;
 
@@ -93,33 +91,35 @@ export namespace InferenceDetectParams {
 
     export namespace Config {
       export interface Completeness {
-        detector_name?: "default";
+        detector_name?: 'default';
       }
 
       export interface Conciseness {
-        detector_name?: "default";
+        detector_name?: 'default';
       }
 
       export interface Hallucination {
-        detector_name?: "default" | "hall_v2";
+        detector_name?: 'default' | 'hall_v2';
       }
 
       export interface HallucinationV0_2 {
-        detector_name?: "default";
+        detector_name?: 'default';
       }
 
       export interface InstructionAdherence {
-        detector_name?: "default";
+        detector_name?: 'default';
       }
 
       export interface Toxicity {
-        detector_name?: "default";
+        detector_name?: 'default';
       }
     }
   }
 }
 
-export namespace Inference {
-  export import InferenceDetectResponse = InferenceAPI.InferenceDetectResponse;
-  export import InferenceDetectParams = InferenceAPI.InferenceDetectParams;
+export declare namespace Inference {
+  export {
+    type InferenceDetectResponse as InferenceDetectResponse,
+    type InferenceDetectParams as InferenceDetectParams,
+  };
 }

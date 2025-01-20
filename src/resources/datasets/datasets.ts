@@ -2,9 +2,16 @@
 
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
-import * as DatasetsAPI from './datasets';
 import * as CollectionAPI from './collection';
+import {
+  Collection,
+  CollectionCreateParams,
+  CollectionCreateResponse,
+  CollectionRetrieveParams,
+  CollectionRetrieveResponse,
+} from './collection';
 import * as RecordsAPI from './records';
+import { RecordListParams, RecordListResponse, Records } from './records';
 
 export class Datasets extends APIResource {
   records: RecordsAPI.Records = new RecordsAPI.Records(this._client);
@@ -61,16 +68,27 @@ export interface DatasetListParams {
   name: string;
 }
 
-export namespace Datasets {
-  export import Dataset = DatasetsAPI.Dataset;
-  export import DatasetCreateParams = DatasetsAPI.DatasetCreateParams;
-  export import DatasetListParams = DatasetsAPI.DatasetListParams;
-  export import Records = RecordsAPI.Records;
-  export import RecordListResponse = RecordsAPI.RecordListResponse;
-  export import RecordListParams = RecordsAPI.RecordListParams;
-  export import Collection = CollectionAPI.Collection;
-  export import CollectionCreateResponse = CollectionAPI.CollectionCreateResponse;
-  export import CollectionRetrieveResponse = CollectionAPI.CollectionRetrieveResponse;
-  export import CollectionCreateParams = CollectionAPI.CollectionCreateParams;
-  export import CollectionRetrieveParams = CollectionAPI.CollectionRetrieveParams;
+Datasets.Records = Records;
+Datasets.Collection = Collection;
+
+export declare namespace Datasets {
+  export {
+    type Dataset as Dataset,
+    type DatasetCreateParams as DatasetCreateParams,
+    type DatasetListParams as DatasetListParams,
+  };
+
+  export {
+    Records as Records,
+    type RecordListResponse as RecordListResponse,
+    type RecordListParams as RecordListParams,
+  };
+
+  export {
+    Collection as Collection,
+    type CollectionCreateResponse as CollectionCreateResponse,
+    type CollectionRetrieveResponse as CollectionRetrieveResponse,
+    type CollectionCreateParams as CollectionCreateParams,
+    type CollectionRetrieveParams as CollectionRetrieveParams,
+  };
 }

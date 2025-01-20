@@ -2,13 +2,18 @@
 
 import { APIResource } from '../../../resource';
 import * as MetricsAPI from './metrics';
+import { MetricRetrieveParams, MetricRetrieveResponse, Metrics } from './metrics';
 
 export class Production extends APIResource {
   metrics: MetricsAPI.Metrics = new MetricsAPI.Metrics(this._client);
 }
 
-export namespace Production {
-  export import Metrics = MetricsAPI.Metrics;
-  export import MetricRetrieveResponse = MetricsAPI.MetricRetrieveResponse;
-  export import MetricRetrieveParams = MetricsAPI.MetricRetrieveParams;
+Production.Metrics = Metrics;
+
+export declare namespace Production {
+  export {
+    Metrics as Metrics,
+    type MetricRetrieveResponse as MetricRetrieveResponse,
+    type MetricRetrieveParams as MetricRetrieveParams,
+  };
 }

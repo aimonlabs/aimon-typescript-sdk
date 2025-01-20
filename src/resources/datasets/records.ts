@@ -2,7 +2,6 @@
 
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
-import * as RecordsAPI from './records';
 
 export class Records extends APIResource {
   /**
@@ -19,7 +18,6 @@ export interface RecordListParams {
   sha: string;
 }
 
-export namespace Records {
-  export import RecordListResponse = RecordsAPI.RecordListResponse;
-  export import RecordListParams = RecordsAPI.RecordListParams;
+export declare namespace Records {
+  export { type RecordListResponse as RecordListResponse, type RecordListParams as RecordListParams };
 }

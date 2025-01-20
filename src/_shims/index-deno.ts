@@ -1,7 +1,7 @@
-import { MultipartBody } from "./MultipartBody";
-import { type RequestOptions } from "../core";
+import { MultipartBody } from './MultipartBody';
+import { type RequestOptions } from '../core';
 
-export const kind: string = "web";
+export const kind: string = 'web';
 
 export type Agent = any;
 
@@ -39,7 +39,7 @@ export { _Headers as Headers };
 type _HeadersInit = HeadersInit;
 export { type _HeadersInit as HeadersInit };
 
-type EndingType = "native" | "transparent";
+type EndingType = 'native' | 'transparent';
 
 export interface BlobPropertyBag {
   endings?: EndingType;
@@ -50,7 +50,7 @@ export interface FilePropertyBag extends BlobPropertyBag {
   lastModified?: number;
 }
 
-export type FileFromPathOptions = Omit<FilePropertyBag, "lastModified">;
+export type FileFromPathOptions = Omit<FilePropertyBag, 'lastModified'>;
 
 const _FormData = FormData;
 type _FormData = FormData;
@@ -66,7 +66,7 @@ export { _Blob as Blob };
 
 export async function getMultipartRequestOptions<T = Record<string, unknown>>(
   form: FormData,
-  opts: RequestOptions<T>
+  opts: RequestOptions<T>,
 ): Promise<RequestOptions<T>> {
   return {
     ...opts,
@@ -79,7 +79,7 @@ export function getDefaultAgent(url: string) {
 }
 export function fileFromPath() {
   throw new Error(
-    "The `fileFromPath` function is only supported in Node. See the README for more details: https://www.github.com/aimonlabs/aimon-typescript-sdk#file-uploads"
+    'The `fileFromPath` function is only supported in Node. See the README for more details: https://www.github.com/stainless-sdks/aimonlabs-node#file-uploads',
   );
 }
 

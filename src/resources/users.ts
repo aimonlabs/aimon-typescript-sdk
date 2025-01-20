@@ -2,7 +2,6 @@
 
 import { APIResource } from '../resource';
 import * as Core from '../core';
-import * as UsersAPI from './users';
 
 export class Users extends APIResource {
   /**
@@ -99,9 +98,11 @@ export interface UserRetrieveParams {
   email: string;
 }
 
-export namespace Users {
-  export import User = UsersAPI.User;
-  export import UserValidateResponse = UsersAPI.UserValidateResponse;
-  export import UserCreateParams = UsersAPI.UserCreateParams;
-  export import UserRetrieveParams = UsersAPI.UserRetrieveParams;
+export declare namespace Users {
+  export {
+    type User as User,
+    type UserValidateResponse as UserValidateResponse,
+    type UserCreateParams as UserCreateParams,
+    type UserRetrieveParams as UserRetrieveParams,
+  };
 }
