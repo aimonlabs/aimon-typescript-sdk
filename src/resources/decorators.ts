@@ -29,7 +29,7 @@ export class Decorators extends APIResource {
         ...(userQuery ? { user_query: userQuery } : {}), // Only include user_query if provided
         config: config,
         ...(instructions ? { instructions } : {}), // Only include instructions if provided
-        ...(taskDefinition ? { taskDefinition } : {}), // Only include instructions if provided
+        ...(taskDefinition ? { task_definition: taskDefinition } : {}), // Only include instructions if provided
         ...(asyncMode ? { async_mode: asyncMode } : {}), // Only include async_mode if provided
         ...(publish ? { publish } : {}), // Only include publish if provided
         ...(applicationName ? { application_name: applicationName } : {}), // Only include application_name if provided
