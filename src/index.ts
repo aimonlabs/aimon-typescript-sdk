@@ -1,12 +1,20 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { type Agent } from './_shims/index';
-import * as Core from './core';
-import * as Errors from './error';
-import * as Uploads from './uploads';
-import * as API from './resources/index';
-import { Analyze, AnalyzeCreateParams, AnalyzeCreateResponse } from './resources/analyze';
-import { Inference, InferenceDetectParams, InferenceDetectResponse } from './resources/inference';
+import { type Agent } from "./_shims/index";
+import * as Core from "./core";
+import * as Errors from "./error";
+import * as Uploads from "./uploads";
+import * as API from "./resources/index";
+import {
+  Analyze,
+  AnalyzeCreateParams,
+  AnalyzeCreateResponse,
+} from "./resources/analyze";
+import {
+  Inference,
+  InferenceDetectParams,
+  InferenceDetectResponse,
+} from "./resources/inference";
 import {
   ModelCreateParams,
   ModelCreateResponse,
@@ -14,9 +22,19 @@ import {
   ModelRetrieveParams,
   ModelRetrieveResponse,
   Models,
-} from './resources/models';
-import { Retrieval, RetrievalRerankParams, RetrievalRerankResponse } from './resources/retrieval';
-import { User, UserCreateParams, UserRetrieveParams, UserValidateResponse, Users } from './resources/users';
+} from "./resources/models";
+import {
+  Retrieval,
+  RetrievalRerankParams,
+  RetrievalRerankResponse,
+} from "./resources/retrieval";
+import {
+  User,
+  UserCreateParams,
+  UserRetrieveParams,
+  UserValidateResponse,
+  Users,
+} from "./resources/users";
 import {
   ApplicationCreateParams,
   ApplicationCreateResponse,
@@ -25,15 +43,21 @@ import {
   ApplicationRetrieveParams,
   ApplicationRetrieveResponse,
   Applications,
-} from './resources/applications/applications';
-import { Dataset, DatasetCreateParams, DatasetListParams, Datasets } from './resources/datasets/datasets';
+} from "./resources/applications/applications";
+import {
+  Dataset,
+  DatasetCreateParams,
+  DatasetListParams,
+  Datasets,
+} from "./resources/datasets/datasets";
 import {
   EvaluationCreateParams,
   EvaluationCreateResponse,
   EvaluationRetrieveParams,
   EvaluationRetrieveResponse,
   Evaluations,
-} from './resources/evaluations/evaluations';
+} from "./resources/evaluations/evaluations";
+import { Decorators } from "./resources/decorators";
 
 export interface ClientOptions {
   authHeader: string;
@@ -115,10 +139,14 @@ export class Client extends Core.APIClient {
    * @param {Core.Headers} opts.defaultHeaders - Default headers to include with every request to the API.
    * @param {Core.DefaultQuery} opts.defaultQuery - Default query parameters to include with every request to the API.
    */
-  constructor({ baseURL = Core.readEnv('CLIENT_BASE_URL'), authHeader, ...opts }: ClientOptions) {
+  constructor({
+    baseURL = Core.readEnv("CLIENT_BASE_URL"),
+    authHeader,
+    ...opts
+  }: ClientOptions) {
     if (authHeader === undefined) {
       throw new Errors.ClientError(
-        "Missing required client option authHeader; you need to instantiate the Client client with an authHeader option, like new Client({ authHeader: 'My Auth Header' }).",
+        "Missing required client option authHeader; you need to instantiate the Client client with an authHeader option, like new Client({ authHeader: 'My Auth Header' })."
       );
     }
 
@@ -147,14 +175,62 @@ export class Client extends Core.APIClient {
   datasets: API.Datasets = new API.Datasets(this);
   evaluations: API.Evaluations = new API.Evaluations(this);
   analyze: API.Analyze = new API.Analyze(this);
+  decorators: API.Decorators = new API.Decorators(this);
   inference: API.Inference = new API.Inference(this);
   retrieval: API.Retrieval = new API.Retrieval(this);
+  // Assuming detect expects specific types for the arguments, replace these types with the correct ones
+  async detect(
+    generatedText: string,
+    context: string[],
+    userQuery?: string,
+    config?: any,
+    instructions?: string,
+    taskDefinition?: string,
+    asyncMode?: boolean,
+    publish?: boolean,
+    applicationName?: string,
+    modelName?: string
+  ): Promise<any> {
+    return await this.decorators.detect(
+      generatedText,
+      context,
+      userQuery,
+      config,
+      instructions,
+      taskDefinition,
+      asyncMode,
+      publish,
+      applicationName,
+      modelName
+    );
+  }
+
+  // Assuming evaluate expects specific types for the arguments
+  async evaluate(
+    applicationName: string,
+    modelName: string,
+    datasetCollectionName: string,
+    evaluationName: string,
+    headers: string[],
+    config?: any
+  ): Promise<any> {
+    return await this.decorators.evaluate(
+      applicationName,
+      modelName,
+      datasetCollectionName,
+      evaluationName,
+      headers,
+      config
+    );
+  }
 
   protected override defaultQuery(): Core.DefaultQuery | undefined {
     return this._options.defaultQuery;
   }
 
-  protected override defaultHeaders(opts: Core.FinalRequestOptions): Core.Headers {
+  protected override defaultHeaders(
+    opts: Core.FinalRequestOptions
+  ): Core.Headers {
     return {
       ...super.defaultHeaders(opts),
       ...this._options.defaultHeaders,
@@ -194,6 +270,7 @@ Client.Evaluations = Evaluations;
 Client.Analyze = Analyze;
 Client.Inference = Inference;
 Client.Retrieval = Retrieval;
+Client.Decorators = Decorators;
 export declare namespace Client {
   export type RequestOptions = Core.RequestOptions;
 
@@ -256,9 +333,11 @@ export declare namespace Client {
     type RetrievalRerankResponse as RetrievalRerankResponse,
     type RetrievalRerankParams as RetrievalRerankParams,
   };
+
+  export { Decorators as Decorators };
 }
 
-export { toFile, fileFromPath } from './uploads';
+export { toFile, fileFromPath } from "./uploads";
 export {
   ClientError,
   APIError,
@@ -273,6 +352,6 @@ export {
   InternalServerError,
   PermissionDeniedError,
   UnprocessableEntityError,
-} from './error';
+} from "./error";
 
 export default Client;
