@@ -15,6 +15,7 @@ export class Decorators extends APIResource {
       hallucination: { detector_name: "default" },
     },
     instructions?: string,
+    taskDefinition?: string,
     asyncMode?: boolean,
     publish?: boolean,
     applicationName?: string,
@@ -28,6 +29,7 @@ export class Decorators extends APIResource {
         ...(userQuery ? { user_query: userQuery } : {}), // Only include user_query if provided
         config: config,
         ...(instructions ? { instructions } : {}), // Only include instructions if provided
+        ...(taskDefinition ? { taskDefinition } : {}), // Only include instructions if provided
         ...(asyncMode ? { async_mode: asyncMode } : {}), // Only include async_mode if provided
         ...(publish ? { publish } : {}), // Only include publish if provided
         ...(applicationName ? { application_name: applicationName } : {}), // Only include application_name if provided
@@ -181,6 +183,14 @@ export class Decorators extends APIResource {
             "When instruction_adherence is specified in the config, 'instructions' must be present in the dataset"
           );
         }
+
+        // Validate and include task definition if required by config
+        if (config.retrieval_relevance && !record.task_definition) {
+          throw new Error(
+            "When retrieval_relevance is specified in the config, 'task_definition' must be present in the dataset"
+          );
+        }
+
         if (record.instructions && config.instruction_adherence) {
           payload.instructions = record.instructions || "";
         }
