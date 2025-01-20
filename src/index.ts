@@ -1,10 +1,63 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import * as Errors from "./error";
-import * as Uploads from "./uploads";
 import { type Agent } from "./_shims/index";
 import * as Core from "./core";
+import * as Errors from "./error";
+import * as Uploads from "./uploads";
 import * as API from "./resources/index";
+import {
+  Analyze,
+  AnalyzeCreateParams,
+  AnalyzeCreateResponse,
+} from "./resources/analyze";
+import {
+  Inference,
+  InferenceDetectParams,
+  InferenceDetectResponse,
+} from "./resources/inference";
+import {
+  ModelCreateParams,
+  ModelCreateResponse,
+  ModelListResponse,
+  ModelRetrieveParams,
+  ModelRetrieveResponse,
+  Models,
+} from "./resources/models";
+import {
+  Retrieval,
+  RetrievalRerankParams,
+  RetrievalRerankResponse,
+} from "./resources/retrieval";
+import {
+  User,
+  UserCreateParams,
+  UserRetrieveParams,
+  UserValidateResponse,
+  Users,
+} from "./resources/users";
+import {
+  ApplicationCreateParams,
+  ApplicationCreateResponse,
+  ApplicationDeleteParams,
+  ApplicationDeleteResponse,
+  ApplicationRetrieveParams,
+  ApplicationRetrieveResponse,
+  Applications,
+} from "./resources/applications/applications";
+import {
+  Dataset,
+  DatasetCreateParams,
+  DatasetListParams,
+  Datasets,
+} from "./resources/datasets/datasets";
+import {
+  EvaluationCreateParams,
+  EvaluationCreateResponse,
+  EvaluationRetrieveParams,
+  EvaluationRetrieveResponse,
+  Evaluations,
+} from "./resources/evaluations/evaluations";
+import { Decorators } from "./resources/decorators";
 
 export interface ClientOptions {
   authHeader: string;
@@ -23,7 +76,7 @@ export interface ClientOptions {
    * Note that request timeouts are retried by default, so in a worst-case scenario you may wait
    * much longer than this timeout before the promise succeeds or fails.
    */
-  timeout?: number;
+  timeout?: number | undefined;
 
   /**
    * An HTTP agent used to manage HTTP(S) connections.
@@ -31,7 +84,7 @@ export interface ClientOptions {
    * If not provided, an agent will be constructed by default in the Node.js environment,
    * otherwise no agent is used.
    */
-  httpAgent?: Agent;
+  httpAgent?: Agent | undefined;
 
   /**
    * Specify a custom `fetch` function implementation.
@@ -47,7 +100,7 @@ export interface ClientOptions {
    *
    * @default 2
    */
-  maxRetries?: number;
+  maxRetries?: number | undefined;
 
   /**
    * Default headers to include with every request to the API.
@@ -55,7 +108,7 @@ export interface ClientOptions {
    * These can be removed in individual requests by explicitly setting the
    * header to `undefined` or `null` in request options.
    */
-  defaultHeaders?: Core.Headers;
+  defaultHeaders?: Core.Headers | undefined;
 
   /**
    * Default query parameters to include with every request to the API.
@@ -63,7 +116,7 @@ export interface ClientOptions {
    * These can be removed in individual requests by explicitly setting the
    * param to `undefined` in request options.
    */
-  defaultQuery?: Core.DefaultQuery;
+  defaultQuery?: Core.DefaultQuery | undefined;
 }
 
 /**
@@ -124,7 +177,7 @@ export class Client extends Core.APIClient {
   analyze: API.Analyze = new API.Analyze(this);
   decorators: API.Decorators = new API.Decorators(this);
   inference: API.Inference = new API.Inference(this);
-
+  retrieval: API.Retrieval = new API.Retrieval(this);
   // Assuming detect expects specific types for the arguments, replace these types with the correct ones
   async detect(
     generatedText: string,
@@ -132,6 +185,7 @@ export class Client extends Core.APIClient {
     userQuery?: string,
     config?: any,
     instructions?: string,
+    taskDefinition?: string,
     asyncMode?: boolean,
     publish?: boolean,
     applicationName?: string,
@@ -143,6 +197,7 @@ export class Client extends Core.APIClient {
       userQuery,
       config,
       instructions,
+      taskDefinition,
       asyncMode,
       publish,
       applicationName,
@@ -207,7 +262,83 @@ export class Client extends Core.APIClient {
   static fileFromPath = Uploads.fileFromPath;
 }
 
-export const {
+Client.Users = Users;
+Client.Models = Models;
+Client.Applications = Applications;
+Client.Datasets = Datasets;
+Client.Evaluations = Evaluations;
+Client.Analyze = Analyze;
+Client.Inference = Inference;
+Client.Retrieval = Retrieval;
+Client.Decorators = Decorators;
+export declare namespace Client {
+  export type RequestOptions = Core.RequestOptions;
+
+  export {
+    Users as Users,
+    type User as User,
+    type UserValidateResponse as UserValidateResponse,
+    type UserCreateParams as UserCreateParams,
+    type UserRetrieveParams as UserRetrieveParams,
+  };
+
+  export {
+    Models as Models,
+    type ModelCreateResponse as ModelCreateResponse,
+    type ModelRetrieveResponse as ModelRetrieveResponse,
+    type ModelListResponse as ModelListResponse,
+    type ModelCreateParams as ModelCreateParams,
+    type ModelRetrieveParams as ModelRetrieveParams,
+  };
+
+  export {
+    Applications as Applications,
+    type ApplicationCreateResponse as ApplicationCreateResponse,
+    type ApplicationRetrieveResponse as ApplicationRetrieveResponse,
+    type ApplicationDeleteResponse as ApplicationDeleteResponse,
+    type ApplicationCreateParams as ApplicationCreateParams,
+    type ApplicationRetrieveParams as ApplicationRetrieveParams,
+    type ApplicationDeleteParams as ApplicationDeleteParams,
+  };
+
+  export {
+    Datasets as Datasets,
+    type Dataset as Dataset,
+    type DatasetCreateParams as DatasetCreateParams,
+    type DatasetListParams as DatasetListParams,
+  };
+
+  export {
+    Evaluations as Evaluations,
+    type EvaluationCreateResponse as EvaluationCreateResponse,
+    type EvaluationRetrieveResponse as EvaluationRetrieveResponse,
+    type EvaluationCreateParams as EvaluationCreateParams,
+    type EvaluationRetrieveParams as EvaluationRetrieveParams,
+  };
+
+  export {
+    Analyze as Analyze,
+    type AnalyzeCreateResponse as AnalyzeCreateResponse,
+    type AnalyzeCreateParams as AnalyzeCreateParams,
+  };
+
+  export {
+    Inference as Inference,
+    type InferenceDetectResponse as InferenceDetectResponse,
+    type InferenceDetectParams as InferenceDetectParams,
+  };
+
+  export {
+    Retrieval as Retrieval,
+    type RetrievalRerankResponse as RetrievalRerankResponse,
+    type RetrievalRerankParams as RetrievalRerankParams,
+  };
+
+  export { Decorators as Decorators };
+}
+
+export { toFile, fileFromPath } from "./uploads";
+export {
   ClientError,
   APIError,
   APIConnectionError,
@@ -221,55 +352,6 @@ export const {
   InternalServerError,
   PermissionDeniedError,
   UnprocessableEntityError,
-} = Errors;
-
-export import toFile = Uploads.toFile;
-export import fileFromPath = Uploads.fileFromPath;
-
-export namespace Client {
-  export import RequestOptions = Core.RequestOptions;
-
-  export import Users = API.Users;
-  export import User = API.User;
-  export import UserValidateResponse = API.UserValidateResponse;
-  export import UserCreateParams = API.UserCreateParams;
-  export import UserRetrieveParams = API.UserRetrieveParams;
-
-  export import Models = API.Models;
-  export import ModelCreateResponse = API.ModelCreateResponse;
-  export import ModelRetrieveResponse = API.ModelRetrieveResponse;
-  export import ModelListResponse = API.ModelListResponse;
-  export import ModelCreateParams = API.ModelCreateParams;
-  export import ModelRetrieveParams = API.ModelRetrieveParams;
-
-  export import Applications = API.Applications;
-  export import ApplicationCreateResponse = API.ApplicationCreateResponse;
-  export import ApplicationRetrieveResponse = API.ApplicationRetrieveResponse;
-  export import ApplicationDeleteResponse = API.ApplicationDeleteResponse;
-  export import ApplicationCreateParams = API.ApplicationCreateParams;
-  export import ApplicationRetrieveParams = API.ApplicationRetrieveParams;
-  export import ApplicationDeleteParams = API.ApplicationDeleteParams;
-
-  export import Datasets = API.Datasets;
-  export import Dataset = API.Dataset;
-  export import DatasetCreateParams = API.DatasetCreateParams;
-  export import DatasetListParams = API.DatasetListParams;
-
-  export import Evaluations = API.Evaluations;
-  export import EvaluationCreateResponse = API.EvaluationCreateResponse;
-  export import EvaluationRetrieveResponse = API.EvaluationRetrieveResponse;
-  export import EvaluationCreateParams = API.EvaluationCreateParams;
-  export import EvaluationRetrieveParams = API.EvaluationRetrieveParams;
-
-  export import Analyze = API.Analyze;
-  export import AnalyzeCreateResponse = API.AnalyzeCreateResponse;
-  export import AnalyzeCreateParams = API.AnalyzeCreateParams;
-
-  export import Inference = API.Inference;
-  export import InferenceDetectResponse = API.InferenceDetectResponse;
-  export import InferenceDetectParams = API.InferenceDetectParams;
-
-  export import Decorators = API.Decorators;
-}
+} from "./error";
 
 export default Client;

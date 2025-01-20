@@ -2,7 +2,6 @@
 
 import { APIResource } from '../resource';
 import * as Core from '../core';
-import * as ModelsAPI from './models';
 
 export class Models extends APIResource {
   /**
@@ -80,10 +79,12 @@ export interface ModelRetrieveParams {
   type: string;
 }
 
-export namespace Models {
-  export import ModelCreateResponse = ModelsAPI.ModelCreateResponse;
-  export import ModelRetrieveResponse = ModelsAPI.ModelRetrieveResponse;
-  export import ModelListResponse = ModelsAPI.ModelListResponse;
-  export import ModelCreateParams = ModelsAPI.ModelCreateParams;
-  export import ModelRetrieveParams = ModelsAPI.ModelRetrieveParams;
+export declare namespace Models {
+  export {
+    type ModelCreateResponse as ModelCreateResponse,
+    type ModelRetrieveResponse as ModelRetrieveResponse,
+    type ModelListResponse as ModelListResponse,
+    type ModelCreateParams as ModelCreateParams,
+    type ModelRetrieveParams as ModelRetrieveParams,
+  };
 }

@@ -2,11 +2,11 @@
 
 export { Evaluations } from './evaluations';
 export {
-  MetricRetrieveResponse,
-  MetricGetEvaluationMetricsResponse,
-  MetricGetEvaluationRunMetricsResponse,
-  MetricRetrieveParams,
-  MetricGetEvaluationMetricsParams,
-  MetricGetEvaluationRunMetricsParams,
   Metrics,
+  type MetricRetrieveResponse,
+  type MetricGetEvaluationMetricsResponse,
+  type MetricGetEvaluationRunMetricsResponse,
+  type MetricRetrieveParams,
+  type MetricGetEvaluationMetricsParams,
+  type MetricGetEvaluationRunMetricsParams,
 } from './metrics';

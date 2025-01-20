@@ -2,7 +2,6 @@
 
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
-import * as RunAPI from './run';
 
 export class Run extends APIResource {
   /**
@@ -53,7 +52,6 @@ export interface RunCreateParams {
   run_number?: number;
 }
 
-export namespace Run {
-  export import RunCreateResponse = RunAPI.RunCreateResponse;
-  export import RunCreateParams = RunAPI.RunCreateParams;
+export declare namespace Run {
+  export { type RunCreateResponse as RunCreateResponse, type RunCreateParams as RunCreateParams };
 }

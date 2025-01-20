@@ -2,8 +2,8 @@
 
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
-import * as EvaluationsAPI from './evaluations';
 import * as RunAPI from './run';
+import { Run, RunCreateParams, RunCreateResponse } from './run';
 
 export class Evaluations extends APIResource {
   run: RunAPI.Run = new RunAPI.Run(this._client);
@@ -81,12 +81,15 @@ export interface EvaluationRetrieveParams {
   name: string;
 }
 
-export namespace Evaluations {
-  export import EvaluationCreateResponse = EvaluationsAPI.EvaluationCreateResponse;
-  export import EvaluationRetrieveResponse = EvaluationsAPI.EvaluationRetrieveResponse;
-  export import EvaluationCreateParams = EvaluationsAPI.EvaluationCreateParams;
-  export import EvaluationRetrieveParams = EvaluationsAPI.EvaluationRetrieveParams;
-  export import Run = RunAPI.Run;
-  export import RunCreateResponse = RunAPI.RunCreateResponse;
-  export import RunCreateParams = RunAPI.RunCreateParams;
+Evaluations.Run = Run;
+
+export declare namespace Evaluations {
+  export {
+    type EvaluationCreateResponse as EvaluationCreateResponse,
+    type EvaluationRetrieveResponse as EvaluationRetrieveResponse,
+    type EvaluationCreateParams as EvaluationCreateParams,
+    type EvaluationRetrieveParams as EvaluationRetrieveParams,
+  };
+
+  export { Run as Run, type RunCreateResponse as RunCreateResponse, type RunCreateParams as RunCreateParams };
 }

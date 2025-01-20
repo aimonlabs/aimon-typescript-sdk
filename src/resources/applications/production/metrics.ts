@@ -2,7 +2,6 @@
 
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
-import * as MetricsAPI from './metrics';
 
 export class Metrics extends APIResource {
   /**
@@ -49,7 +48,9 @@ export interface MetricRetrieveParams {
   version?: string;
 }
 
-export namespace Metrics {
-  export import MetricRetrieveResponse = MetricsAPI.MetricRetrieveResponse;
-  export import MetricRetrieveParams = MetricsAPI.MetricRetrieveParams;
+export declare namespace Metrics {
+  export {
+    type MetricRetrieveResponse as MetricRetrieveResponse,
+    type MetricRetrieveParams as MetricRetrieveParams,
+  };
 }

@@ -2,9 +2,10 @@
 
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
-import * as ApplicationsAPI from './applications';
 import * as EvaluationsAPI from './evaluations/evaluations';
+import { Evaluations } from './evaluations/evaluations';
 import * as ProductionAPI from './production/production';
+import { Production } from './production/production';
 
 export class Applications extends APIResource {
   evaluations: EvaluationsAPI.Evaluations = new EvaluationsAPI.Evaluations(this._client);
@@ -179,13 +180,20 @@ export interface ApplicationDeleteParams {
   version: string;
 }
 
-export namespace Applications {
-  export import ApplicationCreateResponse = ApplicationsAPI.ApplicationCreateResponse;
-  export import ApplicationRetrieveResponse = ApplicationsAPI.ApplicationRetrieveResponse;
-  export import ApplicationDeleteResponse = ApplicationsAPI.ApplicationDeleteResponse;
-  export import ApplicationCreateParams = ApplicationsAPI.ApplicationCreateParams;
-  export import ApplicationRetrieveParams = ApplicationsAPI.ApplicationRetrieveParams;
-  export import ApplicationDeleteParams = ApplicationsAPI.ApplicationDeleteParams;
-  export import Evaluations = EvaluationsAPI.Evaluations;
-  export import Production = ProductionAPI.Production;
+Applications.Evaluations = Evaluations;
+Applications.Production = Production;
+
+export declare namespace Applications {
+  export {
+    type ApplicationCreateResponse as ApplicationCreateResponse,
+    type ApplicationRetrieveResponse as ApplicationRetrieveResponse,
+    type ApplicationDeleteResponse as ApplicationDeleteResponse,
+    type ApplicationCreateParams as ApplicationCreateParams,
+    type ApplicationRetrieveParams as ApplicationRetrieveParams,
+    type ApplicationDeleteParams as ApplicationDeleteParams,
+  };
+
+  export { Evaluations as Evaluations };
+
+  export { Production as Production };
 }

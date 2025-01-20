@@ -2,7 +2,6 @@
 
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
-import * as CollectionAPI from './collection';
 
 export class Collection extends APIResource {
   /**
@@ -93,9 +92,11 @@ export interface CollectionRetrieveParams {
   name: string;
 }
 
-export namespace Collection {
-  export import CollectionCreateResponse = CollectionAPI.CollectionCreateResponse;
-  export import CollectionRetrieveResponse = CollectionAPI.CollectionRetrieveResponse;
-  export import CollectionCreateParams = CollectionAPI.CollectionCreateParams;
-  export import CollectionRetrieveParams = CollectionAPI.CollectionRetrieveParams;
+export declare namespace Collection {
+  export {
+    type CollectionCreateResponse as CollectionCreateResponse,
+    type CollectionRetrieveResponse as CollectionRetrieveResponse,
+    type CollectionCreateParams as CollectionCreateParams,
+    type CollectionRetrieveParams as CollectionRetrieveParams,
+  };
 }
