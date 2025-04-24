@@ -14,7 +14,7 @@ export class Decorators extends APIResource {
     config: any = {
       hallucination: { detector_name: "default" },
     },
-    instructions?: string,
+    instructions?: string[],
     taskDefinition?: string,
     asyncMode?: boolean,
     publish?: boolean,
@@ -193,6 +193,10 @@ export class Decorators extends APIResource {
 
         if (record.instructions && config.instruction_adherence) {
           payload.instructions = record.instructions || "";
+        }
+
+        if (record.task_definition && config.retrieval_relevance) {
+          payload.task_definition = record.task_definition || "";
         }
 
         // Perform analysis and store the result
