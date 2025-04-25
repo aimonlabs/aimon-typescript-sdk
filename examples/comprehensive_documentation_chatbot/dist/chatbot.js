@@ -1,8 +1,17 @@
 import "dotenv/config";
 import Client from "aimon";
 import { VectorStoreIndex, ContextChatEngine } from "llamaindex";
-import { OpenAI, OpenAIEmbedding, SentenceSplitter, Settings } from "llamaindex";
-import { fetch_from_sitemap, extract_text_from_url, get_source_documents } from './functions.js';
+import {
+  OpenAI,
+  OpenAIEmbedding,
+  SentenceSplitter,
+  Settings,
+} from "llamaindex";
+import {
+  fetch_from_sitemap,
+  extract_text_from_url,
+  get_source_documents,
+} from "./functions.js";
 //Setting up the global configurations
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 // Settings.embedModel = new OpenAIEmbedding({model: "text-embedding-ada-002"});
@@ -13,32 +22,37 @@ const aimon = new Client({ authHeader: `Bearer ${process.env.AIMON_API_KEY}` });
 // Fetch the URLs from sitemap
 let aimon_urls = await fetch_from_sitemap("https://docs.aimon.ai/sitemap.xml");
 // Remove the recipes from the list of URLs
-const urlsToRemove = ["https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot",
-    "https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot_TS",
-    "https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot_aperturedb",];
-aimon_urls = aimon_urls.filter(url => !urlsToRemove.includes(url));
+const urlsToRemove = [
+  "https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot",
+  "https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot_TS",
+  "https://docs.aimon.ai/recipes/fixing_hallucinations_in_a_documentation_chatbot_aperturedb",
+];
+aimon_urls = aimon_urls.filter((url) => !urlsToRemove.includes(url));
 // Extract text from the URLs and create LlamaIndex documents
 const documents = [];
 for (let i = 0; i < aimon_urls.length; i++) {
-    const url = aimon_urls[i];
-    // Intentionally not including information on toxicity detectors to demonstrate a hallucination that we will detect using AIMon.
-    if (url == 'https://docs.aimon.ai/category/detectors' || url == 'https://docs.aimon.ai/detectors/toxicity') {
-        continue;
-    }
-    try {
-        const document = await extract_text_from_url(url);
-        documents.push(document);
-    }
-    catch (error) {
-        console.error(`Failed to extract text from ${url}:`, error);
-    }
+  const url = aimon_urls[i];
+  // Intentionally not including information on toxicity detectors to demonstrate a hallucination that we will detect using AIMon.
+  if (
+    url == "https://docs.aimon.ai/category/detectors" ||
+    url == "https://docs.aimon.ai/detectors/toxicity"
+  ) {
+    continue;
+  }
+  try {
+    const document = await extract_text_from_url(url);
+    documents.push(document);
+  } catch (error) {
+    console.error(`Failed to extract text from ${url}:`, error);
+  }
 }
 // Create embeddings and store them in a VectorStore
 const index = await VectorStoreIndex.fromDocuments(documents);
 // Configure a retriever
 const retriever = index.asRetriever({ similarityTopK: 5 });
 // Define a system prompt
-const system_prompt = " Please be professional and polite.\
+const system_prompt =
+  " Please be professional and polite.\
                         Answer the user's question in a single line.\
                         Even if the context lacks information to answer the question, make\
                         sure that you answer the user's question based on your own knowledge.\
@@ -53,13 +67,17 @@ const system_prompt = " Please be professional and polite.\
                         about toxicity labels, it is very likely that the labels include 'toxic', 'abuse' and 'offensive'\
                       ";
 // Set up the chatbot
-const chatbot = new ContextChatEngine({ retriever, systemPrompt: system_prompt });
+const chatbot = new ContextChatEngine({
+  retriever,
+  systemPrompt: system_prompt,
+});
 // Define your query
-const query = "What is the full set of labels that AIMon's toxicity detector generates?";
+const query =
+  "What is the full set of labels that AIMon's toxicity detector generates?";
 // const query = "How many detectors does AIMon provide to the end users?";
-// Define the instructions you want to test for compliance, in order to 
+// Define the instructions you want to test for compliance, in order to
 // assess how well a Large Language Model (LLM) adheres to specific instructions.
-const instructions = "1. Limit the response to under 300 words.";
+const instructions = ["1. Limit the response to under 300 words."];
 // Get response
 const response = await chatbot.chat({ message: query });
 // Retrieve the context used by the LLM to generate this response
@@ -67,10 +85,16 @@ const [context, relevance_scores] = get_source_documents(response);
 // Configure the AIMon hallucination detector
 const detectors = { hallucination: { detector_name: "hdm-1" } };
 // Call AIMon
-const aimonResponse = await aimon.detect(response.response, context, query, detectors, instructions, false, // async_mode = False
-true, // publish = True 
-"TS_HDM1_test", // application name
-"gpt-4o-mini" // model name
+const aimonResponse = await aimon.detect(
+  response.response,
+  context,
+  query,
+  detectors,
+  instructions,
+  false, // async_mode = False
+  true, // publish = True
+  "TS_HDM1_test", // application name
+  "gpt-4o-mini" // model name
 );
 console.log(`\nLLM response: ${response}`);
 console.log(`\nAIMon response: ${JSON.stringify(aimonResponse)}`);
@@ -92,20 +116,37 @@ console.log(`\nAIMon response: ${JSON.stringify(aimonResponse)}`);
 //     console.log('Data has been written to context_1.csv');
 //   }
 // });
-// // //  //   Fixing the hallucination by supplying additional context   // // //  // 
+// // //  //   Fixing the hallucination by supplying additional context   // // //  //
 // Generating documents on AIMon's toxicity detection
-const document_on_detectors = await extract_text_from_url('https://docs.aimon.ai/category/detectors');
-const document_on_toxicity = await extract_text_from_url('https://docs.aimon.ai/detectors/toxicity');
-const updatedIndex = await VectorStoreIndex.fromDocuments([...documents, document_on_detectors, document_on_toxicity]);
+const document_on_detectors = await extract_text_from_url(
+  "https://docs.aimon.ai/category/detectors"
+);
+const document_on_toxicity = await extract_text_from_url(
+  "https://docs.aimon.ai/detectors/toxicity"
+);
+const updatedIndex = await VectorStoreIndex.fromDocuments([
+  ...documents,
+  document_on_detectors,
+  document_on_toxicity,
+]);
 // Re-assemble the chatbot
-const chatbot_2 = new ContextChatEngine({ retriever: updatedIndex.asRetriever({ similarityTopK: 5 }), systemPrompt: system_prompt });
+const chatbot_2 = new ContextChatEngine({
+  retriever: updatedIndex.asRetriever({ similarityTopK: 5 }),
+  systemPrompt: system_prompt,
+});
 // Repeat the same query that produced the hallucination above
 const response_2 = await chatbot_2.chat({ message: query });
 const [context_2, relevance_scores_2] = get_source_documents(response_2);
-const aimonResponse_2 = await aimon.detect(response_2.response, context_2, query, detectors, instructions, false, // async_mode = False
-true, // publish = True 
-"TS_HDM1_test", // application name
-"gpt-4o-mini" // model name
+const aimonResponse_2 = await aimon.detect(
+  response_2.response,
+  context_2,
+  query,
+  detectors,
+  instructions,
+  false, // async_mode = False
+  true, // publish = True
+  "TS_HDM1_test", // application name
+  "gpt-4o-mini" // model name
 );
 console.log(`\nLLM response: ${response_2}`);
 console.log(`\nAIMon response: ${JSON.stringify(aimonResponse_2)}`);

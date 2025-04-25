@@ -184,7 +184,7 @@ export class Client extends Core.APIClient {
     context: string | string[],
     userQuery?: string,
     config?: any,
-    instructions?: string,
+    instructions?: string[],
     taskDefinition?: string,
     asyncMode?: boolean,
     publish?: boolean,
