@@ -178,10 +178,30 @@ export class Decorators extends APIResource {
         if (record.output) payload.output = record.output;
 
         // Validate and include instructions if required by config
-        if (config.instruction_adherence && !record.instructions) {
-          throw new Error(
-            "When instruction_adherence is specified in the config, 'instructions' must be present in the dataset"
-          );
+        if (config.instruction_adherence) {
+          if (!record.instructions) {
+            throw new Error(
+              "When instruction_adherence is specified in the config, 'instructions' must be present in the dataset"
+            );
+          }
+
+          if (Array.isArray(record.instructions)) {
+            payload.instructions = record.instructions;
+          } else if (typeof record.instructions === "string") {
+            try {
+              const parsed = JSON.parse(record.instructions);
+              payload.instructions = Array.isArray(parsed)
+                ? parsed
+                : [record.instructions];
+            } catch {
+              // If it's not valid JSON, treat the string as a single instruction
+              payload.instructions = [record.instructions];
+            }
+          } else {
+            throw new Error(
+              "'instructions' must be a string or array of strings"
+            );
+          }
         }
 
         // Validate and include task definition if required by config
@@ -189,10 +209,6 @@ export class Decorators extends APIResource {
           throw new Error(
             "When retrieval_relevance is specified in the config, 'task_definition' must be present in the dataset"
           );
-        }
-
-        if (record.instructions && config.instruction_adherence) {
-          payload.instructions = record.instructions || "";
         }
 
         if (record.task_definition && config.retrieval_relevance) {
