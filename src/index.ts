@@ -16,6 +16,13 @@ import {
   InferenceDetectResponse,
 } from "./resources/inference";
 import {
+  CustomMetric,
+  MetricCreateParams,
+  MetricCreateResponse,
+  MetricListResponse,
+  Metrics,
+} from "./resources/metrics";
+import {
   ModelCreateParams,
   ModelCreateResponse,
   ModelListResponse,
@@ -178,6 +185,7 @@ export class Client extends Core.APIClient {
   decorators: API.Decorators = new API.Decorators(this);
   inference: API.Inference = new API.Inference(this);
   retrieval: API.Retrieval = new API.Retrieval(this);
+  metrics: API.Metrics = new API.Metrics(this);
   // Assuming detect expects specific types for the arguments, replace these types with the correct ones
   async detect(
     generatedText: string,
@@ -270,6 +278,7 @@ Client.Evaluations = Evaluations;
 Client.Analyze = Analyze;
 Client.Inference = Inference;
 Client.Retrieval = Retrieval;
+Client.Metrics = Metrics;
 Client.Decorators = Decorators;
 export declare namespace Client {
   export type RequestOptions = Core.RequestOptions;
@@ -334,6 +343,13 @@ export declare namespace Client {
     type RetrievalRerankParams as RetrievalRerankParams,
   };
 
+  export {
+    Metrics as Metrics,
+    type CustomMetric as CustomMetric,
+    type MetricCreateResponse as MetricCreateResponse,
+    type MetricListResponse as MetricListResponse,
+    type MetricCreateParams as MetricCreateParams,
+  };
   export { Decorators as Decorators };
 }
 

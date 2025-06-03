@@ -34,6 +34,13 @@ export {
   type InferenceDetectParams,
 } from "./inference";
 export {
+  Metrics,
+  type CustomMetric,
+  type MetricCreateResponse,
+  type MetricListResponse,
+  type MetricCreateParams,
+} from "./metrics";
+export {
   Models,
   type ModelCreateResponse,
   type ModelRetrieveResponse,
