@@ -1,34 +1,45 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { APIResource } from '../../resource';
-import * as Core from '../../core';
-import * as CollectionAPI from './collection';
+import { APIResource } from "../../resource";
+import * as Core from "../../core";
+import * as CollectionAPI from "./collection";
 import {
   Collection,
   CollectionCreateParams,
   CollectionCreateResponse,
   CollectionRetrieveParams,
   CollectionRetrieveResponse,
-} from './collection';
-import * as RecordsAPI from './records';
-import { RecordListParams, RecordListResponse, Records } from './records';
+} from "./collection";
+import * as RecordsAPI from "./records";
+import { RecordListParams, RecordListResponse, Records } from "./records";
 
 export class Datasets extends APIResource {
   records: RecordsAPI.Records = new RecordsAPI.Records(this._client);
-  collection: CollectionAPI.Collection = new CollectionAPI.Collection(this._client);
+  collection: CollectionAPI.Collection = new CollectionAPI.Collection(
+    this._client
+  );
 
   /**
    * Create a new dataset
    */
-  create(body: DatasetCreateParams, options?: Core.RequestOptions): Core.APIPromise<Dataset> {
-    return this._client.post('/v1/dataset', Core.multipartFormRequestOptions({ body, ...options }));
+  create(
+    body: DatasetCreateParams,
+    options?: Core.RequestOptions
+  ): Core.APIPromise<Dataset> {
+    return this._client.post(
+      "/v2/dataset",
+      Core.multipartFormRequestOptions({ body, ...options })
+    );
   }
 
   /**
    * Retrieve a dataset by name
    */
-  list(query: DatasetListParams, options?: Core.RequestOptions): Core.APIPromise<Dataset> {
-    return this._client.get('/v1/dataset', { query, ...options });
+  list(
+    query: DatasetListParams,
+    options?: Core.RequestOptions
+  ): Core.APIPromise<Dataset> {
+    return this._client.get("/v1/dataset", { query, ...options });
   }
 }
 
@@ -59,9 +70,14 @@ export interface DatasetCreateParams {
   file: Core.Uploadable;
 
   /**
-   * JSON string containing dataset metadata
+   * Name of the dataset
    */
-  json_data: string;
+  name: string;
+
+  /**
+   * Optional description of the dataset
+   */
+  description?: string;
 }
 
 export interface DatasetListParams {

@@ -1,21 +1,34 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { APIResource } from '../resource';
-import * as Core from '../core';
+import { APIResource } from "../resource";
+import * as Core from "../core";
 
 export class Metrics extends APIResource {
   /**
    * Create a custom metric
    */
-  create(body: MetricCreateParams, options?: Core.RequestOptions): Core.APIPromise<unknown> {
-    return this._client.post('/v1/custom-metric', { body, ...options });
+  create(
+    body: MetricCreateParams,
+    options?: Core.RequestOptions
+  ): Core.APIPromise<unknown> {
+    return this._client.post("/v1/custom-metric", { body, ...options });
   }
 
   /**
    * List custom metrics
    */
   list(options?: Core.RequestOptions): Core.APIPromise<MetricListResponse> {
-    return this._client.get('/v1/custom-metric', options);
+    return this._client.get("/v1/custom-metric", options);
+  }
+
+  /**
+   * Delete a custom metric
+   */
+  delete(
+    uuid: string,
+    options?: Core.RequestOptions
+  ): Core.APIPromise<MetricDeleteResponse> {
+    return this._client.delete(`/v1/custom-metric/${uuid}`, options);
   }
 }
 
@@ -45,6 +58,10 @@ export type MetricCreateResponse = unknown;
 
 export type MetricListResponse = Array<unknown>;
 
+export interface MetricDeleteResponse {
+  message?: string;
+}
+
 export interface MetricCreateParams {
   instructions: string;
 
@@ -60,6 +77,7 @@ export declare namespace Metrics {
     type CustomMetric as CustomMetric,
     type MetricCreateResponse as MetricCreateResponse,
     type MetricListResponse as MetricListResponse,
+    type MetricDeleteResponse as MetricDeleteResponse,
     type MetricCreateParams as MetricCreateParams,
   };
 }

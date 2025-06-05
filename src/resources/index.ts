@@ -38,6 +38,7 @@ export {
   type CustomMetric,
   type MetricCreateResponse,
   type MetricListResponse,
+  type MetricDeleteResponse,
   type MetricCreateParams,
 } from "./metrics";
 export {

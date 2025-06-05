@@ -19,6 +19,7 @@ import {
   CustomMetric,
   MetricCreateParams,
   MetricCreateResponse,
+  MetricDeleteResponse,
   MetricListResponse,
   Metrics,
 } from "./resources/metrics";
@@ -348,6 +349,7 @@ export declare namespace Client {
     type CustomMetric as CustomMetric,
     type MetricCreateResponse as MetricCreateResponse,
     type MetricListResponse as MetricListResponse,
+    type MetricDeleteResponse as MetricDeleteResponse,
     type MetricCreateParams as MetricCreateParams,
   };
   export { Decorators as Decorators };
