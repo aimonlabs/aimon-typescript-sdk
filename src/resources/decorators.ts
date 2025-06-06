@@ -204,13 +204,13 @@ export class Decorators extends APIResource {
           }
         }
 
-        // Handle task_definition with fallback if required
-        if (config.retrieval_relevance) {
-          const td = record.task_definition?.trim();
-          payload.task_definition =
-            typeof td === "string" && td.length > 0
-              ? td
-              : "Your task is to grade the relevance of context document(s) against the specified user query.";
+        // Include task_definition if present and non-empty
+        // sdk-backend handles default otherwise
+        if (config.retrieval_relevance && typeof record.task_definition === "string") {
+          const td = record.task_definition.trim();
+          if (td.length > 0) {
+            payload.task_definition = td;
+          }
         }
 
         // Perform analysis and store the result
