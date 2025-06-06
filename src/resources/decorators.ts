@@ -29,7 +29,7 @@ export class Decorators extends APIResource {
         ...(userQuery ? { user_query: userQuery } : {}), // Only include user_query if provided
         config: config,
         ...(instructions ? { instructions } : {}), // Only include instructions if provided
-        ...(taskDefinition ? { task_definition: taskDefinition } : {}), // Only include instructions if provided
+        ...(taskDefinition ? { task_definition: taskDefinition } : {}), // Only include task_definition if provided
         ...(asyncMode ? { async_mode: asyncMode } : {}), // Only include async_mode if provided
         ...(publish ? { publish } : {}), // Only include publish if provided
         ...(applicationName ? { application_name: applicationName } : {}), // Only include application_name if provided
@@ -65,7 +65,7 @@ export class Decorators extends APIResource {
       }
 
       if (!modelName) {
-        throw new Error("modelNamemust be provided");
+        throw new Error("modelName must be provided");
       }
 
       if (!applicationName) {
@@ -204,15 +204,13 @@ export class Decorators extends APIResource {
           }
         }
 
-        // Validate and include task definition if required by config
-        if (config.retrieval_relevance && !record.task_definition) {
-          throw new Error(
-            "When retrieval_relevance is specified in the config, 'task_definition' must be present in the dataset"
-          );
-        }
-
-        if (record.task_definition && config.retrieval_relevance) {
-          payload.task_definition = record.task_definition || "";
+        // Include task_definition if present and non-empty
+        // sdk-backend handles default otherwise
+        if (config.retrieval_relevance && typeof record.task_definition === "string") {
+          const td = record.task_definition.trim();
+          if (td.length > 0) {
+            payload.task_definition = td;
+          }
         }
 
         // Perform analysis and store the result
