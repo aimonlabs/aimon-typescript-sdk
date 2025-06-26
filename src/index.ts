@@ -219,16 +219,16 @@ export class Client extends Core.APIClient {
     applicationName: string,
     modelName: string,
     datasetCollectionName: string,
-    evaluationName: string,
     headers: string[],
+    evaluationName?: string,
     config?: any
   ): Promise<any> {
     return await this.decorators.evaluate(
       applicationName,
       modelName,
       datasetCollectionName,
-      evaluationName,
       headers,
+      evaluationName,
       config
     );
   }
