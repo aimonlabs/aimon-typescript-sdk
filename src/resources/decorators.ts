@@ -51,8 +51,8 @@ export class Decorators extends APIResource {
     applicationName: string,
     modelName: string,
     datasetCollectionName: string,
-    evaluationName: string,
     headers: string[],
+    evaluationName?: string,
     config: any = { hallucination: { detector_name: "default" } }
   ): Promise<any> {
     try {
@@ -76,8 +76,10 @@ export class Decorators extends APIResource {
         throw new Error("datasetCollectionName must be provided");
       }
 
+      // Generate evaluation name if not provided
       if (!evaluationName) {
-        throw new Error("evaluationName must be provided");
+        const timestamp = new Date().toISOString().replace(/[-:.TZ]/g, "");
+        evaluationName = `${applicationName}-${modelName}-${timestamp}`;
       }
 
       // Create or retrieve the model
@@ -206,7 +208,10 @@ export class Decorators extends APIResource {
 
         // Include task_definition if present and non-empty
         // sdk-backend handles default otherwise
-        if (config.retrieval_relevance && typeof record.task_definition === "string") {
+        if (
+          config.retrieval_relevance &&
+          typeof record.task_definition === "string"
+        ) {
           const td = record.task_definition.trim();
           if (td.length > 0) {
             payload.task_definition = td;
