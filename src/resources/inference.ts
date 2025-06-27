@@ -69,6 +69,11 @@ export namespace InferenceDetectParams {
      * The user's query
      */
     user_query?: string;
+
+    /**
+     * Indicates the computation strategy. Must be either 'all_or_none' or 'ignore_failures'.
+     */
+    must_compute?: 'all_or_none' | 'ignore_failures';
   }
 
   export namespace Body {

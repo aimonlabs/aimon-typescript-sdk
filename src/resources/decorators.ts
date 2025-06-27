@@ -19,7 +19,8 @@ export class Decorators extends APIResource {
     asyncMode?: boolean,
     publish?: boolean,
     applicationName?: string,
-    modelName?: string
+    modelName?: string,
+    mustCompute: 'all_or_none' | 'ignore_failures' = 'all_or_none'
   ): Promise<any> {
     try {
       // Prepare the payload for detect API
@@ -34,6 +35,7 @@ export class Decorators extends APIResource {
         ...(publish ? { publish } : {}), // Only include publish if provided
         ...(applicationName ? { application_name: applicationName } : {}), // Only include application_name if provided
         ...(modelName ? { model_name: modelName } : {}), // Only include model_name if provided
+        must_compute: mustCompute, // Always include must_compute with default value
       };
 
       const detectResponse = await this._client.inference.detect([
