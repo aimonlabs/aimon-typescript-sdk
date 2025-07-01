@@ -198,7 +198,8 @@ export class Client extends Core.APIClient {
     asyncMode?: boolean,
     publish?: boolean,
     applicationName?: string,
-    modelName?: string
+    modelName?: string,
+    mustCompute: 'all_or_none' | 'ignore_failures' = 'all_or_none'
   ): Promise<any> {
     return await this.decorators.detect(
       generatedText,
@@ -210,7 +211,8 @@ export class Client extends Core.APIClient {
       asyncMode,
       publish,
       applicationName,
-      modelName
+      modelName,
+      mustCompute
     );
   }
 
