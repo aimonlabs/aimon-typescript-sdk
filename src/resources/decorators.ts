@@ -8,8 +8,8 @@ export class Decorators extends APIResource {
    * Simplified method to create and analyze metrics by setting up the application and model.
    */
   async detect(
-    generatedText: string,
-    context: string | string[],
+    generatedText?: string,
+    context?: string | string[],
     userQuery?: string,
     config: any = {
       hallucination: { detector_name: "default" },
@@ -25,8 +25,8 @@ export class Decorators extends APIResource {
     try {
       // Prepare the payload for detect API
       const inferenceBody: any = {
-        context: context,
-        generated_text: generatedText,
+        ...(context !== undefined ? { context } : {}),
+        ...(generatedText !== undefined ? { generated_text: generatedText } : {}),
         ...(userQuery ? { user_query: userQuery } : {}), // Only include user_query if provided
         config: config,
         ...(instructions ? { instructions } : {}), // Only include instructions if provided

@@ -189,8 +189,8 @@ export class Client extends Core.APIClient {
   metrics: API.Metrics = new API.Metrics(this);
   // Assuming detect expects specific types for the arguments, replace these types with the correct ones
   async detect(
-    generatedText: string,
-    context: string | string[],
+    generatedText?: string,
+    context?: string | string[],
     userQuery?: string,
     config?: any,
     instructions?: string[],
