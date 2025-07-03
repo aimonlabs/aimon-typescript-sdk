@@ -25,16 +25,16 @@ export class Decorators extends APIResource {
     try {
       // Prepare the payload for detect API
       const inferenceBody: any = {
-        ...(context !== undefined ? { context } : {}),
-        ...(generatedText !== undefined ? { generated_text: generatedText } : {}),
-        ...(userQuery ? { user_query: userQuery } : {}), // Only include user_query if provided
+        ...(context ? { context } : {}),                                    // Only include context if provided
+        ...(generatedText ? { generated_text: generatedText } : {}),        // Only include generated_text if provided
+        ...(userQuery ? { user_query: userQuery } : {}),                    // Only include user_query if provided
         config: config,
-        ...(instructions ? { instructions } : {}), // Only include instructions if provided
-        ...(taskDefinition ? { task_definition: taskDefinition } : {}), // Only include task_definition if provided
-        ...(asyncMode ? { async_mode: asyncMode } : {}), // Only include async_mode if provided
-        ...(publish ? { publish } : {}), // Only include publish if provided
-        ...(applicationName ? { application_name: applicationName } : {}), // Only include application_name if provided
-        ...(modelName ? { model_name: modelName } : {}), // Only include model_name if provided
+        ...(instructions ? { instructions } : {}),                          // Only include instructions if provided
+        ...(taskDefinition ? { task_definition: taskDefinition } : {}),     // Only include task_definition if provided
+        ...(asyncMode ? { async_mode: asyncMode } : {}),                    // Only include async_mode if provided
+        ...(publish ? { publish } : {}),                                    // Only include publish if provided
+        ...(applicationName ? { application_name: applicationName } : {}),  // Only include application_name if provided
+        ...(modelName ? { model_name: modelName } : {}),                    // Only include model_name if provided
         must_compute: mustCompute, // Always include must_compute with default value
       };
 
