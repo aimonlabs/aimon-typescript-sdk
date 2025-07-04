@@ -187,10 +187,11 @@ export class Client extends Core.APIClient {
   inference: API.Inference = new API.Inference(this);
   retrieval: API.Retrieval = new API.Retrieval(this);
   metrics: API.Metrics = new API.Metrics(this);
-  // Assuming detect expects specific types for the arguments, replace these types with the correct ones
+
+  // Detect method overloads: allow both positional and object-based calls
   async detect(
-    generatedText: string,
-    context: string | string[],
+    generatedText?: string,
+    context?: string | string[],
     userQuery?: string,
     config?: any,
     instructions?: string[],
@@ -199,20 +200,86 @@ export class Client extends Core.APIClient {
     publish?: boolean,
     applicationName?: string,
     modelName?: string,
-    mustCompute: 'all_or_none' | 'ignore_failures' = 'all_or_none'
+    mustCompute?: 'all_or_none' | 'ignore_failures'
+  ): Promise<any>;
+
+  // New object-style overload signature
+  async detect(options: {
+    generatedText?: string;
+    context?: string | string[];
+    userQuery?: string;
+    config: any;
+    instructions?: string[];
+    taskDefinition?: string;
+    asyncMode?: boolean;
+    publish?: boolean;
+    applicationName?: string;
+    modelName?: string;
+    mustCompute?: 'all_or_none' | 'ignore_failures';
+  }): Promise<any>;
+
+  // Unified implementation for both call styles
+  async detect(
+    arg1?: any,
+    arg2?: any,
+    arg3?: any,
+    arg4?: any,
+    arg5?: any,
+    arg6?: any,
+    arg7?: any,
+    arg8?: any,
+    arg9?: any,
+    arg10?: any,
+    arg11: any = 'all_or_none'
   ): Promise<any> {
+    let opts: any;
+
+    // Detect whether the call is object-style (recommended) or positional (legacy)
+    if (typeof arg1 === 'object' && arg1 !== null && !Array.isArray(arg1)) {
+      // Called using object syntax
+      opts = {
+        generatedText: arg1.generatedText,
+        context: arg1.context,
+        userQuery: arg1.userQuery,
+        config: arg1.config,
+        instructions: arg1.instructions,
+        taskDefinition: arg1.taskDefinition,
+        asyncMode: arg1.asyncMode,
+        publish: arg1.publish,
+        applicationName: arg1.applicationName,
+        modelName: arg1.modelName,
+        mustCompute: arg1.mustCompute ?? 'all_or_none',
+      };
+    } else {
+      // Called using positional syntax (backward compatible)
+      opts = {
+        generatedText: arg1,
+        context: arg2,
+        userQuery: arg3,
+        config: arg4,
+        instructions: arg5,
+        taskDefinition: arg6,
+        asyncMode: arg7,
+        publish: arg8,
+        applicationName: arg9,
+        modelName: arg10,
+        mustCompute: arg11 ?? 'all_or_none',
+      };
+    }
+    
+    // Forwarding to decorators.detect with normalized arguments
     return await this.decorators.detect(
-      generatedText,
-      context,
-      userQuery,
-      config,
-      instructions,
-      taskDefinition,
-      asyncMode,
-      publish,
-      applicationName,
-      modelName,
-      mustCompute
+      opts.generatedText,
+      opts.context,
+      opts.userQuery,
+      opts.config,
+      opts.instructions,
+      opts.taskDefinition,
+      opts.asyncMode,
+      opts.publish,
+      opts.applicationName,
+      opts.modelName,
+      opts.mustCompute
     );
   }
 
