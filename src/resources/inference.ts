@@ -74,6 +74,11 @@ export namespace InferenceDetectParams {
      * Indicates the computation strategy. Must be either 'all_or_none' or 'ignore_failures'.
      */
     must_compute?: 'all_or_none' | 'ignore_failures';
+
+    /**
+     * Optional tool trace for analysis
+     */
+    tool_trace?: any[];
   }
 
   export namespace Body {
