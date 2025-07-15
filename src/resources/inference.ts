@@ -11,7 +11,7 @@ export class Inference extends APIResource {
     body: InferenceDetectParams,
     options?: Core.RequestOptions,
   ): Core.APIPromise<InferenceDetectResponse> {
-    return this._client.post('/v3/detect', { body, ...options });
+    return this._client.post('/v2/detect', { body, ...options });
   }
 }
 
