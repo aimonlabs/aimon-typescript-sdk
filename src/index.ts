@@ -216,6 +216,7 @@ export class Client extends Core.APIClient {
     applicationName?: string;
     modelName?: string;
     mustCompute?: 'all_or_none' | 'ignore_failures';
+    toolTrace?: any[];
   }): Promise<any>;
 
   // Unified implementation for both call styles
@@ -249,6 +250,7 @@ export class Client extends Core.APIClient {
         applicationName: arg1.applicationName,
         modelName: arg1.modelName,
         mustCompute: arg1.mustCompute ?? 'all_or_none',
+        toolTrace: arg1.toolTrace,
       };
     } else {
       // Called using positional syntax (backward compatible)
@@ -279,7 +281,8 @@ export class Client extends Core.APIClient {
       opts.publish,
       opts.applicationName,
       opts.modelName,
-      opts.mustCompute
+      opts.mustCompute,
+      opts.toolTrace
     );
   }
 
