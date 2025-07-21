@@ -28,7 +28,7 @@ export class Datasets extends APIResource {
    * Retrieve a dataset by name
    */
   list(query: DatasetListParams, options?: Core.RequestOptions): Core.APIPromise<Dataset> {
-    return this._client.get('/v2/dataset', { query, ...options });
+    return this._client.get('/v1/dataset', { query, ...options });
   }
 }
 
