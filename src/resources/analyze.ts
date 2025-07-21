@@ -18,7 +18,7 @@ export interface AnalyzeCreateResponse {
   /**
    * Status code representing the outcome of the operation
    */
-  status?: number;
+  status: number;
 }
 
 export type AnalyzeCreateParams = Array<AnalyzeCreateParams.Body>;
@@ -47,6 +47,8 @@ export namespace AnalyzeCreateParams {
     evaluation_run_id?: string | null;
 
     instructions?: string;
+
+    config?: object;
   }
 }
 

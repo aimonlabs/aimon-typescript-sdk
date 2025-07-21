@@ -9,6 +9,16 @@ export class Retrieval extends APIResource {
    * definition containing domain-specific relevance information. Users can provide a
    * few-shot examples to fine-tune the model for better domain-specific
    * understanding.
+   *
+   * @example
+   * ```ts
+   * const response = await client.retrieval.rerank({
+   *   context_docs: ['Document 1', 'Document 2'],
+   *   queries: ['Query 1', 'Query 2'],
+   *   task_definition:
+   *     'Relevance ranking for domain-specific queries.',
+   * });
+   * ```
    */
   rerank(
     body: RetrievalRerankParams,

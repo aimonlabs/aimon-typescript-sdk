@@ -1,20 +1,12 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import { type Agent } from "./_shims/index";
-import * as Core from "./core";
-import * as Errors from "./error";
-import * as Uploads from "./uploads";
-import * as API from "./resources/index";
-import {
-  Analyze,
-  AnalyzeCreateParams,
-  AnalyzeCreateResponse,
-} from "./resources/analyze";
-import {
-  Inference,
-  InferenceDetectParams,
-  InferenceDetectResponse,
-} from "./resources/inference";
+import { type Agent } from './_shims/index';
+import * as Core from './core';
+import * as Errors from './error';
+import * as Uploads from './uploads';
+import * as API from './resources/index';
+import { Analyze, AnalyzeCreateParams, AnalyzeCreateResponse } from './resources/analyze';
+import { Inference, InferenceDetectParams, InferenceDetectResponse } from './resources/inference';
 import {
   CustomMetric,
   MetricCreateParams,
@@ -22,7 +14,7 @@ import {
   MetricDeleteResponse,
   MetricListResponse,
   Metrics,
-} from "./resources/metrics";
+} from './resources/metrics';
 import {
   ModelCreateParams,
   ModelCreateResponse,
@@ -30,19 +22,9 @@ import {
   ModelRetrieveParams,
   ModelRetrieveResponse,
   Models,
-} from "./resources/models";
-import {
-  Retrieval,
-  RetrievalRerankParams,
-  RetrievalRerankResponse,
-} from "./resources/retrieval";
-import {
-  User,
-  UserCreateParams,
-  UserRetrieveParams,
-  UserValidateResponse,
-  Users,
-} from "./resources/users";
+} from './resources/models';
+import { Retrieval, RetrievalRerankParams, RetrievalRerankResponse } from './resources/retrieval';
+import { User, UserCreateParams, UserRetrieveParams, UserValidateResponse, Users } from './resources/users';
 import {
   ApplicationCreateParams,
   ApplicationCreateResponse,
@@ -51,20 +33,15 @@ import {
   ApplicationRetrieveParams,
   ApplicationRetrieveResponse,
   Applications,
-} from "./resources/applications/applications";
-import {
-  Dataset,
-  DatasetCreateParams,
-  DatasetListParams,
-  Datasets,
-} from "./resources/datasets/datasets";
+} from './resources/applications/applications';
+import { Dataset, DatasetCreateParams, DatasetListParams, Datasets } from './resources/datasets/datasets';
 import {
   EvaluationCreateParams,
   EvaluationCreateResponse,
   EvaluationRetrieveParams,
   EvaluationRetrieveResponse,
   Evaluations,
-} from "./resources/evaluations/evaluations";
+} from './resources/evaluations/evaluations';
 import { Decorators } from "./resources/decorators";
 
 export interface ClientOptions {
@@ -83,8 +60,10 @@ export interface ClientOptions {
    *
    * Note that request timeouts are retried by default, so in a worst-case scenario you may wait
    * much longer than this timeout before the promise succeeds or fails.
+   *
+   * @unit milliseconds
    */
-  timeout?: number | undefined;
+  timeout?: number;
 
   /**
    * An HTTP agent used to manage HTTP(S) connections.
@@ -92,7 +71,7 @@ export interface ClientOptions {
    * If not provided, an agent will be constructed by default in the Node.js environment,
    * otherwise no agent is used.
    */
-  httpAgent?: Agent | undefined;
+  httpAgent?: Agent;
 
   /**
    * Specify a custom `fetch` function implementation.
@@ -108,7 +87,7 @@ export interface ClientOptions {
    *
    * @default 2
    */
-  maxRetries?: number | undefined;
+  maxRetries?: number;
 
   /**
    * Default headers to include with every request to the API.
@@ -116,7 +95,7 @@ export interface ClientOptions {
    * These can be removed in individual requests by explicitly setting the
    * header to `undefined` or `null` in request options.
    */
-  defaultHeaders?: Core.Headers | undefined;
+  defaultHeaders?: Core.Headers;
 
   /**
    * Default query parameters to include with every request to the API.
@@ -124,7 +103,7 @@ export interface ClientOptions {
    * These can be removed in individual requests by explicitly setting the
    * param to `undefined` in request options.
    */
-  defaultQuery?: Core.DefaultQuery | undefined;
+  defaultQuery?: Core.DefaultQuery;
 }
 
 /**
@@ -147,14 +126,10 @@ export class Client extends Core.APIClient {
    * @param {Core.Headers} opts.defaultHeaders - Default headers to include with every request to the API.
    * @param {Core.DefaultQuery} opts.defaultQuery - Default query parameters to include with every request to the API.
    */
-  constructor({
-    baseURL = Core.readEnv("CLIENT_BASE_URL"),
-    authHeader,
-    ...opts
-  }: ClientOptions) {
+  constructor({ baseURL = Core.readEnv('CLIENT_BASE_URL'), authHeader, ...opts }: ClientOptions) {
     if (authHeader === undefined) {
       throw new Errors.ClientError(
-        "Missing required client option authHeader; you need to instantiate the Client client with an authHeader option, like new Client({ authHeader: 'My Auth Header' })."
+        "Missing required client option authHeader; you need to instantiate the Client client with an authHeader option, like new Client({ authHeader: 'My Auth Header' }).",
       );
     }
 
@@ -166,6 +141,7 @@ export class Client extends Core.APIClient {
 
     super({
       baseURL: options.baseURL!,
+      baseURLOverridden: baseURL ? baseURL !== 'https://pbe-api.aimon.ai' : false,
       timeout: options.timeout ?? 60000 /* 1 minute */,
       httpAgent: options.httpAgent,
       maxRetries: options.maxRetries,
@@ -187,6 +163,13 @@ export class Client extends Core.APIClient {
   inference: API.Inference = new API.Inference(this);
   retrieval: API.Retrieval = new API.Retrieval(this);
   metrics: API.Metrics = new API.Metrics(this);
+
+  /**
+   * Check whether the base URL is set to its default.
+   */
+  #baseURLOverridden(): boolean {
+    return this.baseURL !== 'https://pbe-api.aimon.ai';
+  }
 
   // Detect method overloads: allow both positional and object-based calls
   async detect(
@@ -216,6 +199,7 @@ export class Client extends Core.APIClient {
     applicationName?: string;
     modelName?: string;
     mustCompute?: 'all_or_none' | 'ignore_failures';
+    toolTrace?: any[];
   }): Promise<any>;
 
   // Unified implementation for both call styles
@@ -249,6 +233,7 @@ export class Client extends Core.APIClient {
         applicationName: arg1.applicationName,
         modelName: arg1.modelName,
         mustCompute: arg1.mustCompute ?? 'all_or_none',
+        toolTrace: arg1.toolTrace,
       };
     } else {
       // Called using positional syntax (backward compatible)
@@ -279,7 +264,8 @@ export class Client extends Core.APIClient {
       opts.publish,
       opts.applicationName,
       opts.modelName,
-      opts.mustCompute
+      opts.mustCompute,
+      opts.toolTrace
     );
   }
 
@@ -306,9 +292,7 @@ export class Client extends Core.APIClient {
     return this._options.defaultQuery;
   }
 
-  protected override defaultHeaders(
-    opts: Core.FinalRequestOptions
-  ): Core.Headers {
+  protected override defaultHeaders(opts: Core.FinalRequestOptions): Core.Headers {
     return {
       ...super.defaultHeaders(opts),
       ...this._options.defaultHeaders,
@@ -424,7 +408,7 @@ export declare namespace Client {
   export { Decorators as Decorators };
 }
 
-export { toFile, fileFromPath } from "./uploads";
+export { toFile, fileFromPath } from './uploads';
 export {
   ClientError,
   APIError,
@@ -439,6 +423,6 @@ export {
   InternalServerError,
   PermissionDeniedError,
   UnprocessableEntityError,
-} from "./error";
+} from './error';
 
 export default Client;
