@@ -31,16 +31,6 @@ export type InferenceDetectParams = Array<InferenceDetectParams.Body>;
 export namespace InferenceDetectParams {
   export interface Body {
     /**
-     * Context as an array of strings or a single string
-     */
-    context: Array<string> | string;
-
-    /**
-     * The generated text based on context and user query
-     */
-    generated_text: string;
-
-    /**
      * The application name for publishing metrics.
      */
     application_name?: string;
@@ -56,9 +46,25 @@ export namespace InferenceDetectParams {
     config?: Body.Config;
 
     /**
+     * Context as an array of strings or a single string
+     */
+    context?: Array<string> | string;
+
+    /**
+     * The generated text based on context and user query
+     */
+    generated_text?: string;
+
+    /**
      * The model name for publishing metrics for an application.
      */
     model_name?: string;
+
+    /**
+     * Indicates the computation strategy. Must be either 'all_or_none' or
+     * 'ignore_failures'.
+     */
+    must_compute?: 'all_or_none' | 'ignore_failures';
 
     /**
      * Indicates whether to publish metrics.
@@ -66,19 +72,14 @@ export namespace InferenceDetectParams {
     publish?: boolean;
 
     /**
+     * Optional tool trace for analysis
+     */
+    tool_trace?: Array<unknown>;
+
+    /**
      * The user's query
      */
     user_query?: string;
-
-    /**
-     * Indicates the computation strategy. Must be either 'all_or_none' or 'ignore_failures'.
-     */
-    must_compute?: 'all_or_none' | 'ignore_failures';
-
-    /**
-     * Optional tool trace for analysis
-     */
-    tool_trace?: any[];
   }
 
   export namespace Body {
