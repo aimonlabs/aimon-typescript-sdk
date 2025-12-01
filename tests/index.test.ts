@@ -151,13 +151,13 @@ describe('instantiate client', () => {
     test('empty env variable', () => {
       process.env['AIMON_BASE_URL'] = ''; // empty
       const client = new Aimon({ apiKey: 'My API Key' });
-      expect(client.baseURL).toEqual('https://pbe-api.aimon.ai');
+      expect(client.baseURL).toEqual('https://sdkbe-production.aimon.ai');
     });
 
     test('blank env variable', () => {
       process.env['AIMON_BASE_URL'] = '  '; // blank
       const client = new Aimon({ apiKey: 'My API Key' });
-      expect(client.baseURL).toEqual('https://pbe-api.aimon.ai');
+      expect(client.baseURL).toEqual('https://sdkbe-production.aimon.ai');
     });
   });
 

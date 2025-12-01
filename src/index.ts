@@ -118,7 +118,7 @@ export class Client extends Core.APIClient {
    * API Client for interfacing with the Client API.
    *
    * @param {string} opts.authHeader
-   * @param {string} [opts.baseURL=process.env['CLIENT_BASE_URL'] ?? https://pbe-api.aimon.ai] - Override the default base URL for the API.
+   * @param {string} [opts.baseURL=process.env['CLIENT_BASE_URL'] ?? https://sdkbe-production.aimon.ai] - Override the default base URL for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {number} [opts.httpAgent] - An HTTP agent used to manage HTTP(s) connections.
    * @param {Core.Fetch} [opts.fetch] - Specify a custom `fetch` function implementation.
@@ -136,12 +136,12 @@ export class Client extends Core.APIClient {
     const options: ClientOptions = {
       authHeader,
       ...opts,
-      baseURL: baseURL || `https://pbe-api.aimon.ai`,
+      baseURL: baseURL || `https://sdkbe-production.aimon.ai`,
     };
 
     super({
       baseURL: options.baseURL!,
-      baseURLOverridden: baseURL ? baseURL !== 'https://pbe-api.aimon.ai' : false,
+      baseURLOverridden: baseURL ? baseURL !== 'https://sdkbe-production.aimon.ai' : false,
       timeout: options.timeout ?? 60000 /* 1 minute */,
       httpAgent: options.httpAgent,
       maxRetries: options.maxRetries,
@@ -168,7 +168,7 @@ export class Client extends Core.APIClient {
    * Check whether the base URL is set to its default.
    */
   #baseURLOverridden(): boolean {
-    return this.baseURL !== 'https://pbe-api.aimon.ai';
+    return this.baseURL !== 'https://sdkbe-production.aimon.ai';
   }
 
   // Detect method overloads: allow both positional and object-based calls
