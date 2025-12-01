@@ -106,6 +106,8 @@ export interface ClientOptions {
   defaultQuery?: Core.DefaultQuery;
 }
 
+const DEFAULT_BASE_URL = 'https://sdkbe-production.aimon.ai';
+
 /**
  * API Client for interfacing with the Client API.
  */
@@ -136,12 +138,12 @@ export class Client extends Core.APIClient {
     const options: ClientOptions = {
       authHeader,
       ...opts,
-      baseURL: baseURL || `https://sdkbe-production.aimon.ai`,
+      baseURL: baseURL || DEFAULT_BASE_URL,
     };
 
     super({
       baseURL: options.baseURL!,
-      baseURLOverridden: baseURL ? baseURL !== 'https://sdkbe-production.aimon.ai' : false,
+      baseURLOverridden: baseURL ? baseURL !== DEFAULT_BASE_URL : false,
       timeout: options.timeout ?? 60000 /* 1 minute */,
       httpAgent: options.httpAgent,
       maxRetries: options.maxRetries,
@@ -168,7 +170,7 @@ export class Client extends Core.APIClient {
    * Check whether the base URL is set to its default.
    */
   #baseURLOverridden(): boolean {
-    return this.baseURL !== 'https://sdkbe-production.aimon.ai';
+    return this.baseURL !== DEFAULT_BASE_URL;
   }
 
   // Detect method overloads: allow both positional and object-based calls
